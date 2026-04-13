@@ -25,6 +25,16 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "icon_font",
+              "id": "posC1",
+              "name": "logoIcon",
+              "width": 24,
+              "height": 24,
+              "iconFontName": "sparkles",
+              "iconFontFamily": "lucide",
+              "fill": "$accent-primary"
+            },
+            {
               "type": "text",
               "id": "D47O4",
               "name": "navLogo",
@@ -6542,6 +6552,106 @@
                               "fill": "#FFE0CC",
                               "width": "fill_container",
                               "height": 60
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "JlUP0",
+                          "name": "chartLabels",
+                          "width": "fill_container",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "8wPTc",
+                              "name": "l1",
+                              "fill": "$foreground-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Oct",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "QgqVC",
+                              "name": "l2",
+                              "fill": "$foreground-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Nov",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mv8ku",
+                              "name": "l3",
+                              "fill": "$foreground-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Dec",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "QXDyd",
+                              "name": "l4",
+                              "fill": "$accent-primary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Jan",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "hSXU6",
+                              "name": "l5",
+                              "fill": "$foreground-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Feb",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "tO6aX",
+                              "name": "l6",
+                              "fill": "$foreground-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Mar",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "IKIQj",
+                              "name": "l7",
+                              "fill": "$foreground-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Apr",
+                              "textAlign": "center",
+                              "fontFamily": "Funnel Sans",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
