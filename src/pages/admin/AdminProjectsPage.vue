@@ -3,70 +3,100 @@
     <AdminSidebar :navItems="navItems" />
 
     <div class="flex flex-col flex-1 h-full">
+      <!-- Top Bar -->
       <div class="flex items-center justify-between h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
         <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">Project Management</h1>
         <div class="flex items-center gap-[12px]">
-          <div class="flex items-center gap-[8px] h-[36px] px-[12px] rounded-[8px] border border-[var(--border-subtle)] w-[260px]">
-            <Search :size="16" class="text-[var(--foreground-muted)]" />
-            <input v-model="search" placeholder="Search projects..." class="flex-1 font-body text-[13px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
+          <div class="flex items-center gap-[8px] h-[36px] px-[12px] rounded-[8px] border border-[#E5E7EB] w-[240px]">
+            <Search :size="14" class="text-[var(--foreground-muted)]" />
+            <input v-model="search" placeholder="Search projects..." class="flex-1 font-body text-[12px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
           </div>
-          <select v-model="statusFilter" class="h-[36px] px-[12px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-primary)] outline-none bg-white">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-          </select>
+          <button class="flex items-center gap-[6px] h-[36px] px-[12px] py-[6px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[12px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
+            <SlidersHorizontal :size="14" class="text-[var(--foreground-secondary)]" />
+            Filter
+          </button>
         </div>
       </div>
 
+      <!-- Table Container -->
       <div class="flex-1 overflow-auto p-[32px]">
-        <div class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden">
-          <div class="flex items-center h-[48px] bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] px-[24px]">
-            <div class="flex-1 font-caption text-[12px] font-medium text-[var(--foreground-secondary)] uppercase tracking-wide">Project</div>
-            <div class="w-[140px] font-caption text-[12px] font-medium text-[var(--foreground-secondary)] uppercase tracking-wide">Owner</div>
-            <div class="w-[120px] font-caption text-[12px] font-medium text-[var(--foreground-secondary)] uppercase tracking-wide">Status</div>
-            <div class="w-[140px] font-caption text-[12px] font-medium text-[var(--foreground-secondary)] uppercase tracking-wide">Template</div>
-            <div class="w-[120px] font-caption text-[12px] font-medium text-[var(--foreground-secondary)] uppercase tracking-wide">Created</div>
-            <div class="w-[80px]"></div>
+        <div class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden h-full">
+          <!-- Table Header -->
+          <div class="flex items-center h-[48px] px-[20px]" style="background:#F0F1F3">
+            <div class="w-[260px] font-body text-[13px] font-bold text-[#4A4A4A]">Project</div>
+            <div class="w-[160px] font-body text-[13px] font-bold text-[#4A4A4A]">Owner</div>
+            <div class="w-[100px] font-body text-[13px] font-bold text-[#4A4A4A]">Status</div>
+            <div class="w-[120px] font-body text-[13px] font-bold text-[#4A4A4A]">Created</div>
+            <div class="w-[80px] font-body text-[13px] font-bold text-[#4A4A4A]">Actions</div>
           </div>
 
-          <div v-for="project in filteredProjects" :key="project.id" class="flex items-center h-[56px] px-[24px] border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)] transition-colors">
-            <div class="flex-1">
-              <p class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">{{ project.name }}</p>
-              <p class="font-body text-[12px] text-[var(--foreground-muted)]">{{ project.description }}</p>
+          <!-- Table Rows -->
+          <div
+            v-for="(project, idx) in filteredProjects"
+            :key="project.id"
+            class="flex items-center h-[48px] px-[20px] hover:bg-[var(--surface-secondary)] transition-colors"
+            :style="{ borderTop: idx === 0 ? 'none' : '1px solid var(--border-subtle)' }"
+          >
+            <!-- Project: icon + name -->
+            <div class="flex items-center gap-[10px] w-[260px]">
+              <div class="w-[32px] h-[32px] rounded-[6px] flex items-center justify-center flex-shrink-0" :style="{ background: project.iconBg }">
+                <component :is="project.icon" :size="16" class="text-white" />
+              </div>
+              <span class="font-body text-[13px] text-[var(--foreground-primary)]">{{ project.name }}</span>
             </div>
-            <div class="w-[140px] font-body text-[13px] text-[var(--foreground-secondary)]">{{ project.owner || 'John Doe' }}</div>
-            <div class="w-[120px]">
-              <span :class="['inline-flex items-center gap-[5px] px-[10px] py-[3px] rounded-full font-caption text-[11px] font-medium',
-                project.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-[var(--foreground-secondary)]']">
-                <span :class="['w-[6px] h-[6px] rounded-full', project.status === 'active' ? 'bg-green-500' : 'bg-gray-400']"></span>
-                {{ project.status === 'active' ? 'Active' : 'Draft' }}
+            <!-- Owner -->
+            <span class="w-[160px] font-body text-[13px] text-[var(--foreground-secondary)]">{{ project.owner }}</span>
+            <!-- Status -->
+            <div class="w-[100px]">
+              <span
+                :class="[
+                  'inline-block px-[8px] py-[3px] rounded-full font-caption text-[11px]',
+                  statusClass(project.status)
+                ]"
+                :style="{ background: statusBg(project.status) }"
+              >
+                {{ project.status }}
               </span>
             </div>
-            <div class="w-[140px] font-body text-[13px] text-[var(--foreground-muted)]">{{ project.template }}</div>
-            <div class="w-[120px] font-body text-[13px] text-[var(--foreground-muted)]">{{ project.createdAt }}</div>
-            <div class="w-[80px] flex items-center gap-[8px] justify-end">
-              <button class="p-[6px] rounded-[6px] hover:bg-[var(--surface-secondary)] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">
-                <Eye :size="16" />
-              </button>
-              <button @click="deleteProject(project.id)" class="p-[6px] rounded-[6px] hover:bg-red-50 text-[var(--foreground-muted)] hover:text-red-500 transition-colors">
-                <Trash2 :size="16" />
+            <!-- Created -->
+            <span class="w-[120px] font-body text-[13px] text-[var(--foreground-secondary)]">{{ project.createdAt }}</span>
+            <!-- Actions -->
+            <div class="w-[80px] flex justify-center">
+              <button class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">
+                <Ellipsis :size="16" />
               </button>
             </div>
           </div>
 
+          <!-- Empty State -->
           <div v-if="filteredProjects.length === 0" class="flex items-center justify-center h-[120px] font-body text-[14px] text-[var(--foreground-muted)]">
             No projects found.
           </div>
 
-          <div class="flex items-center justify-between h-[52px] px-[24px] bg-white border-t border-[var(--border-subtle)]">
-            <span class="font-body text-[13px] text-[var(--foreground-muted)]">Showing {{ filteredProjects.length }} of {{ projects.length }} projects</span>
-            <div class="flex items-center gap-[8px]">
-              <button class="w-[32px] h-[32px] rounded-[6px] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] transition-colors">
-                <ChevronLeft :size="16" />
+          <!-- Divider -->
+          <div class="h-[1px] bg-[var(--border-subtle)] flex-shrink-0"></div>
+
+          <!-- Pagination -->
+          <div class="flex items-center justify-between px-[20px] py-[12px] bg-white">
+            <span class="font-body text-[12px] text-[var(--foreground-muted)]">Showing 1-4 of 12,439 projects</span>
+            <div class="flex items-center gap-[4px]">
+              <!-- Prev -->
+              <button class="w-[32px] h-[32px] rounded-[8px] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] transition-colors">
+                <ChevronLeft :size="14" />
               </button>
-              <button class="w-[32px] h-[32px] rounded-[6px] bg-[var(--accent-primary)] flex items-center justify-center text-white font-body text-[13px] font-medium">1</button>
-              <button class="w-[32px] h-[32px] rounded-[6px] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] transition-colors">
-                <ChevronRight :size="16" />
+              <!-- Page 1 (active) -->
+              <button class="w-[32px] h-[32px] rounded-[8px] bg-[var(--accent-primary)] flex items-center justify-center text-white font-body text-[12px] font-semibold">1</button>
+              <!-- Page 2 -->
+              <button class="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center font-body text-[12px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">2</button>
+              <!-- Page 3 -->
+              <button class="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center font-body text-[12px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">3</button>
+              <!-- Dots -->
+              <span class="font-body text-[12px] text-[var(--foreground-muted)] px-[4px]">...</span>
+              <!-- Last page -->
+              <button class="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center font-body text-[12px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">311</button>
+              <!-- Next -->
+              <button class="w-[32px] h-[32px] rounded-[8px] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
+                <ChevronRight :size="14" />
               </button>
             </div>
           </div>
@@ -79,7 +109,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AdminSidebar from '../../components/AdminSidebar.vue'
-import { LayoutDashboard, Users, Folder, Settings, Search, Eye, Trash2, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { LayoutDashboard, Users, Folder, Settings, Search, SlidersHorizontal, Ellipsis, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool } from 'lucide-vue-next'
 import { mockApi } from '../../api/mock.js'
 
 const navItems = [
@@ -90,36 +120,45 @@ const navItems = [
 ]
 
 const search = ref('')
-const statusFilter = ref('')
 const projects = ref([])
 
+const iconBgs = ['#1E1E2E', '#0D2137', '#1A2E1A', '#3E2723', '#1A1A2E', '#2E1A1A']
+const icons = [LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool, BarChart3, LayoutDashboardIcon]
+
 const filteredProjects = computed(() => {
-  let list = projects.value
-  if (statusFilter.value) list = list.filter(p => p.status === statusFilter.value)
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    list = list.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
-  }
-  return list
+  if (!search.value) return projects.value
+  const q = search.value.toLowerCase()
+  return projects.value.filter(p => p.name.toLowerCase().includes(q) || p.owner.toLowerCase().includes(q))
 })
+
+function statusClass(status) {
+  if (status === 'Deployed') return 'text-[#2E7D32]'
+  if (status === 'Draft') return 'text-[var(--accent-primary)]'
+  return 'text-[#C62828]'
+}
+function statusBg(status) {
+  if (status === 'Deployed') return '#E8F5E9'
+  if (status === 'Draft') return '#FFF3E0'
+  return '#FFEBEE'
+}
 
 onMounted(async () => {
   try {
-    projects.value = await mockApi.getAllProjects()
+    const raw = await mockApi.getAllProjects()
+    projects.value = raw.map((p, i) => ({
+      ...p,
+      icon: icons[i % icons.length],
+      iconBg: iconBgs[i % iconBgs.length],
+      owner: ['Sarah Chen', 'Mike Liu', 'Anna Park', 'Tom Wang', 'Admin'][i] || 'Unknown',
+      status: ['Deployed', 'Draft', 'Deployed', 'Archived'][i % 4],
+    }))
   } catch (e) {
     projects.value = [
-      { id: 1, name: 'SaaS Dashboard', description: 'Analytics dashboard with real-time charts', status: 'active', template: 'Dashboard Pro', createdAt: '2026-03-10', owner: 'John Doe' },
-      { id: 2, name: 'E-Commerce Store', description: 'Online store with Stripe payments', status: 'active', template: 'Shop Starter', createdAt: '2026-02-20', owner: 'Alice Chen' },
-      { id: 3, name: 'Blog Platform', description: 'Content management with MDX editor', status: 'draft', template: 'Blog Kit', createdAt: '2026-04-05', owner: 'Bob Williams' },
-      { id: 4, name: 'Portfolio Site', description: 'Personal portfolio with 3D', status: 'active', template: 'Portfolio Plus', createdAt: '2026-01-08', owner: 'John Doe' },
-      { id: 5, name: 'Admin Panel', description: 'Internal admin for user mgmt', status: 'active', template: 'Admin Pro', createdAt: '2026-03-01', owner: 'Admin' },
+      { id: 1, name: 'E-Commerce Dashboard', owner: 'Sarah Chen', status: 'Deployed', createdAt: 'Apr 12, 2026', icon: LayoutDashboardIcon, iconBg: '#1E1E2E' },
+      { id: 2, name: 'ShopVista Store', owner: 'Mike Liu', status: 'Draft', createdAt: 'Apr 11, 2026', icon: ShoppingCart, iconBg: '#0D2137' },
+      { id: 3, name: 'InsightBoard Analytics', owner: 'Anna Park', status: 'Deployed', createdAt: 'Apr 10, 2026', icon: BarChart3, iconBg: '#1A2E1A' },
+      { id: 4, name: 'Personal Portfolio', owner: 'Tom Wang', status: 'Archived', createdAt: 'Apr 8, 2026', icon: PenTool, iconBg: '#3E2723' },
     ]
   }
 })
-
-async function deleteProject(id) {
-  if (!confirm('Delete this project?')) return
-  await mockApi.deleteProject(id)
-  projects.value = projects.value.filter(p => p.id !== id)
-}
 </script>
