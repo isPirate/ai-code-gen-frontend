@@ -40,7 +40,7 @@
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">API Key</label>
                 <div class="flex items-center gap-[12px]">
                   <input :type="showKey ? 'text' : 'password'" v-model="aiConfig.apiKey" class="flex-1 h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)]" />
-                  <button type="button" @click="showKey = !showKey" class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]">
+                  <button type="button" @click="showKey = !showKey" class="p-[6px] rounded-[6px] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors cursor-pointer">
                     <EyeOff v-if="showKey" :size="20" />
                     <Eye v-else :size="20" />
                   </button>

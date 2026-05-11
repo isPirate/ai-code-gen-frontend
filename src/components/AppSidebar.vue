@@ -24,7 +24,6 @@
 
     <div class="flex-1"></div>
 
-    <!-- Logout -->
     <button @click="handleLogout" class="flex items-center gap-[10px] h-[40px] px-[12px] rounded-[8px] w-full text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
       <LogOut :size="18" />
       <span class="font-body text-[14px]">Log out</span>
@@ -34,7 +33,7 @@
       <div class="w-[32px] h-[32px] rounded-full bg-[var(--accent-secondary)] flex-shrink-0"></div>
       <div class="flex flex-col gap-[2px] min-w-0">
         <span class="font-body text-[13px] font-medium text-[var(--foreground-primary)] truncate">{{ userName }}</span>
-        <span class="font-caption text-[11px] text-[var(--foreground-muted)] truncate">{{ userEmail }}</span>
+        <span class="font-caption text-[11px] text-[var(--foreground-muted)] truncate">{{ userAccount }}</span>
       </div>
     </div>
   </aside>
@@ -44,7 +43,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Sparkles, LogOut } from 'lucide-vue-next'
-import { mockApi } from '../api/mock.js'
+import { useAuth } from '../stores/auth'
 
 const props = defineProps({
   navItems: { type: Array, required: true },
@@ -52,17 +51,17 @@ const props = defineProps({
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuth()
 
-const user = computed(() => JSON.parse(localStorage.getItem('codepilot_user') || '{}'))
-const userName = computed(() => user.value.name || 'User')
-const userEmail = computed(() => user.value.email || 'user@example.com')
+const userName = computed(() => auth.user.value?.userName || 'User')
+const userAccount = computed(() => auth.user.value?.userAccount || '')
 
 function isActive(path) {
   return route.path === path
 }
 
 async function handleLogout() {
-  await mockApi.logout()
+  await auth.logout()
   router.push('/')
 }
 </script>

@@ -32,25 +32,25 @@
               <span class="font-heading text-[24px] font-bold text-white">{{ userInitial }}</span>
             </div>
             <div>
-              <p class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">{{ user.name }}</p>
-              <p class="font-body text-[13px] text-[var(--foreground-secondary)]">{{ user.email }}</p>
+              <p class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">{{ auth.user.value?.userName || 'User' }}</p>
+              <p class="font-body text-[13px] text-[var(--foreground-secondary)]">{{ auth.user.value?.userAccount || '' }}</p>
             </div>
           </div>
 
           <div class="flex gap-[16px] w-full">
             <div class="flex flex-col gap-[6px] flex-1">
-              <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Full Name</label>
-              <input v-model="form.name" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" />
+              <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Display Name</label>
+              <input v-model="form.userName" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" />
             </div>
             <div class="flex flex-col gap-[6px] flex-1">
-              <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Email</label>
-              <input v-model="form.email" type="email" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" />
+              <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Account</label>
+              <input :value="form.userAccount" disabled class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-muted)] outline-none bg-[var(--surface-secondary)] cursor-not-allowed" />
             </div>
           </div>
 
           <div class="flex flex-col gap-[6px] w-full">
-            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Bio</label>
-            <textarea v-model="form.bio" rows="3" placeholder="Tell us about yourself..." class="px-[14px] py-[10px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors resize-none"></textarea>
+            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Profile</label>
+            <textarea v-model="form.userProfile" rows="3" placeholder="Tell us about yourself..." class="px-[14px] py-[10px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors resize-none"></textarea>
           </div>
 
           <div class="w-full h-[1px] bg-[var(--border-subtle)]"></div>
@@ -74,6 +74,7 @@
               {{ saving ? 'Saving...' : 'Save Changes' }}
             </button>
           </div>
+          <p v-if="saveError" class="font-body text-[13px] text-red-500 text-center">{{ saveError }}</p>
         </div>
       </div>
     </div>
@@ -96,9 +97,11 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
 import { MonitorDot, Store, Palette, User, Bell, CreditCard } from 'lucide-vue-next'
-import { mockApi } from '../api/mock.js'
+import { useAuth } from '../stores/auth'
+import { api } from '../api/client'
 
 const router = useRouter()
+const auth = useAuth()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
@@ -114,22 +117,36 @@ const tabs = [
 
 const activeTab = ref('profile')
 const saving = ref(false)
+const saveError = ref('')
 const showDeleteConfirm = ref(false)
 
-const user = ref(JSON.parse(localStorage.getItem('codepilot_user') || '{"name":"John Doe","email":"john@example.com","bio":""}'))
+// Init form from auth store
 const form = ref({
-  name: user.value.name || 'John Doe',
-  email: user.value.email || 'john@example.com',
-  bio: user.value.bio || '',
+  userName: auth.user.value?.userName || '',
+  userAccount: auth.user.value?.userAccount || '',
+  userProfile: auth.user.value?.userProfile || '',
 })
 
-const userInitial = computed(() => (form.value.name || 'U')[0].toUpperCase())
+const userInitial = computed(() => (form.value.userName || 'U')[0].toUpperCase())
 
 async function saveProfile() {
+  saveError.value = ''
   saving.value = true
   try {
-    const updated = await mockApi.updateProfile({ name: form.value.name, email: form.value.email, bio: form.value.bio })
-    user.value = updated
+    const userId = auth.user.value?.id
+    if (!userId) throw new Error('Not authenticated')
+
+    await api.updateUser({
+      id: userId,
+      userName: form.value.userName,
+      userAvatar: auth.user.value?.userAvatar || '',
+      userProfile: form.value.userProfile,
+      userRole: auth.user.value?.userRole || 'user',
+    })
+    // Refresh user data from server
+    await auth.fetchCurrentUser()
+  } catch (e) {
+    saveError.value = e.message
   } finally {
     saving.value = false
   }
@@ -140,7 +157,11 @@ function confirmDelete() {
 }
 
 async function deleteAccount() {
-  await mockApi.deleteAccount()
+  const userId = auth.user.value?.id
+  if (userId) {
+    try { await api.deleteUser(userId) } catch {}
+  }
+  await auth.logout()
   router.push('/')
 }
 </script>

@@ -107,10 +107,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import AdminSidebar from '../../components/AdminSidebar.vue'
 import { LayoutDashboard, Users, Folder, Settings, Search, SlidersHorizontal, Ellipsis, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool } from 'lucide-vue-next'
-import { mockApi } from '../../api/mock.js'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -142,23 +141,11 @@ function statusBg(status) {
   return '#FFEBEE'
 }
 
-onMounted(async () => {
-  try {
-    const raw = await mockApi.getAllProjects()
-    projects.value = raw.map((p, i) => ({
-      ...p,
-      icon: icons[i % icons.length],
-      iconBg: iconBgs[i % iconBgs.length],
-      owner: ['Sarah Chen', 'Mike Liu', 'Anna Park', 'Tom Wang', 'Admin'][i] || 'Unknown',
-      status: ['Deployed', 'Draft', 'Deployed', 'Archived'][i % 4],
-    }))
-  } catch (e) {
-    projects.value = [
-      { id: 1, name: 'E-Commerce Dashboard', owner: 'Sarah Chen', status: 'Deployed', createdAt: 'Apr 12, 2026', icon: LayoutDashboardIcon, iconBg: '#1E1E2E' },
-      { id: 2, name: 'ShopVista Store', owner: 'Mike Liu', status: 'Draft', createdAt: 'Apr 11, 2026', icon: ShoppingCart, iconBg: '#0D2137' },
-      { id: 3, name: 'InsightBoard Analytics', owner: 'Anna Park', status: 'Deployed', createdAt: 'Apr 10, 2026', icon: BarChart3, iconBg: '#1A2E1A' },
-      { id: 4, name: 'Personal Portfolio', owner: 'Tom Wang', status: 'Archived', createdAt: 'Apr 8, 2026', icon: PenTool, iconBg: '#3E2723' },
-    ]
-  }
-})
+// Static project data (no project API yet)
+projects.value = [
+  { id: 1, name: 'E-Commerce Dashboard', owner: 'Sarah Chen', status: 'Deployed', createdAt: 'Apr 12, 2026', icon: LayoutDashboardIcon, iconBg: '#1E1E2E' },
+  { id: 2, name: 'ShopVista Store', owner: 'Mike Liu', status: 'Draft', createdAt: 'Apr 11, 2026', icon: ShoppingCart, iconBg: '#0D2137' },
+  { id: 3, name: 'InsightBoard Analytics', owner: 'Anna Park', status: 'Deployed', createdAt: 'Apr 10, 2026', icon: BarChart3, iconBg: '#1A2E1A' },
+  { id: 4, name: 'Personal Portfolio', owner: 'Tom Wang', status: 'Archived', createdAt: 'Apr 8, 2026', icon: PenTool, iconBg: '#3E2723' },
+]
 </script>

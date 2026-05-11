@@ -1,21 +1,20 @@
 <template>
-  <div class="flex w-full h-screen bg-[var(--surface-primary)]">
+  <div class="flex w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
     <!-- Brand Panel -->
     <div class="relative flex flex-col justify-between gap-[32px] w-[560px] h-full p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E8491D] to-[#D4370A] overflow-hidden">
-      <!-- Decorative elements -->
-      <div class="absolute w-[320px] h-[320px] rounded-full bg-gradient-radial from-white/15 to-transparent opacity-80" style="top:80px;left:-80px"></div>
-      <div class="absolute w-[200px] h-[200px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-40px;left:360px"></div>
-      <div class="absolute w-[160px] h-[160px] rounded-full bg-gradient-radial from-white/12 to-transparent" style="top:500px;left:400px"></div>
-      <div class="absolute w-[100px] h-[100px] rounded-[24px] bg-white/10 rotate-[15deg]" style="top:380px;left:60px"></div>
-      <div class="absolute w-[60px] h-[60px] rounded-[16px] bg-white/8 -rotate-[20deg]" style="top:680px;left:340px"></div>
-      <div class="absolute w-[80px] h-[80px] rounded-[20px] bg-white/10 rotate-[30deg]" style="top:640px;left:-20px"></div>
-      <div class="absolute w-[8px] h-[8px] rounded-full bg-white/25" style="top:160px;left:120px"></div>
-      <div class="absolute w-[6px] h-[6px] rounded-full bg-white/20" style="top:320px;left:440px"></div>
-      <div class="absolute w-[10px] h-[10px] rounded-full bg-white/15" style="top:720px;left:300px"></div>
-      <div class="absolute w-[5px] h-[5px] rounded-full bg-white/20" style="top:560px;left:480px"></div>
-      <div class="absolute w-[7px] h-[7px] rounded-full bg-white/15" style="top:500px;left:30px"></div>
-      <div class="absolute w-[120px] h-[120px] rounded-full border border-white/15" style="top:200px;left:420px"></div>
-      <div class="absolute w-[180px] h-[180px] rounded-full border border-white/10" style="top:300px;left:-40px"></div>
+      <div class="absolute pointer-events-none w-[320px] h-[320px] rounded-full bg-gradient-radial from-white/15 to-transparent opacity-80" style="top:80px;left:-80px"></div>
+      <div class="absolute pointer-events-none w-[200px] h-[200px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-40px;left:360px"></div>
+      <div class="absolute pointer-events-none w-[160px] h-[160px] rounded-full bg-gradient-radial from-white/12 to-transparent" style="top:500px;left:400px"></div>
+      <div class="absolute pointer-events-none w-[100px] h-[100px] rounded-[24px] bg-white/10 rotate-[15deg]" style="top:380px;left:60px"></div>
+      <div class="absolute pointer-events-none w-[60px] h-[60px] rounded-[16px] bg-white/8 -rotate-[20deg]" style="top:680px;left:340px"></div>
+      <div class="absolute pointer-events-none w-[80px] h-[80px] rounded-[20px] bg-white/10 rotate-[30deg]" style="top:640px;left:-20px"></div>
+      <div class="absolute pointer-events-none w-[8px] h-[8px] rounded-full bg-white/25" style="top:160px;left:120px"></div>
+      <div class="absolute pointer-events-none w-[6px] h-[6px] rounded-full bg-white/20" style="top:320px;left:440px"></div>
+      <div class="absolute pointer-events-none w-[10px] h-[10px] rounded-full bg-white/15" style="top:720px;left:300px"></div>
+      <div class="absolute pointer-events-none w-[5px] h-[5px] rounded-full bg-white/20" style="top:560px;left:480px"></div>
+      <div class="absolute pointer-events-none w-[7px] h-[7px] rounded-full bg-white/15" style="top:500px;left:30px"></div>
+      <div class="absolute pointer-events-none w-[120px] h-[120px] rounded-full border border-white/15" style="top:200px;left:420px"></div>
+      <div class="absolute pointer-events-none w-[180px] h-[180px] rounded-full border border-white/10" style="top:300px;left:-40px"></div>
 
       <div class="relative flex flex-col gap-[28px] bg-white/5 rounded-[24px] p-[40px] shadow-[0_4px_24px_#00000020]">
         <span class="font-heading text-[32px] font-bold text-white tracking-[-0.5px]">CodePilot</span>
@@ -50,12 +49,12 @@
 
     <!-- Login Form -->
     <div class="relative flex items-center justify-center flex-1 h-full p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
-      <div class="absolute w-[300px] h-[300px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:100px;right:20px"></div>
-      <div class="absolute w-[250px] h-[250px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-40px"></div>
-      <div class="absolute w-[60px] h-[60px] rounded-[14px] bg-[#FF5C0006] rotate-[20deg]" style="top:450px;right:50px"></div>
-      <div class="absolute w-[6px] h-[6px] rounded-full bg-[#FF5C0015]" style="top:350px;right:50%"></div>
-      <div class="absolute w-[8px] h-[8px] rounded-full bg-[#FF5C0012]" style="top:200px;left:80px"></div>
-      <div class="absolute w-[40px] h-[40px] rounded-[10px] bg-[#FF5C0005] -rotate-[15deg]" style="bottom:100px;left:30px"></div>
+      <div class="absolute pointer-events-none w-[300px] h-[300px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:100px;right:20px"></div>
+      <div class="absolute pointer-events-none w-[250px] h-[250px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-40px"></div>
+      <div class="absolute pointer-events-none w-[60px] h-[60px] rounded-[14px] bg-[#FF5C0006] rotate-[20deg]" style="top:450px;right:50px"></div>
+      <div class="absolute pointer-events-none w-[6px] h-[6px] rounded-full bg-[#FF5C0015]" style="top:350px;right:50%"></div>
+      <div class="absolute pointer-events-none w-[8px] h-[8px] rounded-full bg-[#FF5C0012]" style="top:200px;left:80px"></div>
+      <div class="absolute pointer-events-none w-[40px] h-[40px] rounded-[10px] bg-[#FF5C0005] -rotate-[15deg]" style="bottom:100px;left:30px"></div>
 
       <div class="flex flex-col gap-[28px] w-full max-w-[480px]">
         <div>
@@ -65,24 +64,24 @@
 
         <form @submit.prevent="handleLogin" class="flex flex-col gap-[24px] w-full">
           <div class="flex flex-col gap-[6px]">
-            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Email</label>
+            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Account</label>
             <input
-              v-model="email"
-              type="email"
-              placeholder="you@example.com"
-              class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors"
+              v-model="userAccount"
+              type="text"
+              placeholder="Enter your account"
+              class="w-full h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors"
             />
           </div>
           <div class="flex flex-col gap-[6px]">
             <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Password</label>
-            <div class="flex items-center justify-between h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)] transition-colors">
+            <div class="flex items-center h-[44px] rounded-[8px] border border-[var(--border-subtle)] focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)] transition-colors overflow-hidden">
               <input
                 v-model="password"
                 :type="showPass ? 'text' : 'password'"
                 placeholder="Enter your password"
-                class="flex-1 font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent"
+                class="flex-1 h-full px-[14px] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent"
               />
-              <button type="button" @click="showPass = !showPass" class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]">
+              <button type="button" @click="showPass = !showPass" class="flex-shrink-0 h-full px-[10px] flex items-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors cursor-pointer">
                 <EyeOff v-if="showPass" :size="18" />
                 <Eye v-else :size="18" />
               </button>
@@ -138,11 +137,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
-import { mockApi } from '../api/mock.js'
+import { useAuth } from '../stores/auth'
 
 const router = useRouter()
-const email = ref('john@example.com')
-const password = ref('password123')
+const auth = useAuth()
+
+const userAccount = ref('')
+const password = ref('')
 const showPass = ref(false)
 const remember = ref(false)
 const loading = ref(false)
@@ -156,14 +157,14 @@ const stats = [
 
 async function handleLogin() {
   error.value = ''
-  if (!email.value || !password.value) {
+  if (!userAccount.value || !password.value) {
     error.value = 'Please fill in all fields'
     return
   }
   loading.value = true
   try {
-    const result = await mockApi.login(email.value, password.value)
-    if (result.user.role === 'admin') {
+    const user = await auth.login(userAccount.value, password.value)
+    if (user.userRole === 'admin') {
       router.push('/admin')
     } else {
       router.push('/dashboard')

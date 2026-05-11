@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '../stores/auth'
 
 const routes = [
   {
@@ -72,10 +73,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const user = JSON.parse(localStorage.getItem('codepilot_user') || 'null')
-  if (to.meta.requiresAuth && !user) {
+  const auth = useAuth()
+  if (to.meta.requiresAuth && !auth.isAuthenticated.value) {
     next('/login')
-  } else if (to.meta.requiresAdmin && user?.role !== 'admin') {
+  } else if (to.meta.requiresAdmin && !auth.isAdmin.value) {
     next('/dashboard')
   } else {
     next()

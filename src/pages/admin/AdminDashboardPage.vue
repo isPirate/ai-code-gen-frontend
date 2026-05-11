@@ -90,10 +90,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import AdminSidebar from '../../components/AdminSidebar.vue'
 import { LayoutDashboard, Users, Folder, Settings, Calendar, Download, TrendingUp, TrendingDown } from 'lucide-vue-next'
-import { mockApi } from '../../api/mock.js'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -123,10 +122,4 @@ const statsData = ref({
   ],
 })
 
-onMounted(async () => {
-  try {
-    const data = await mockApi.getStats()
-    statsData.value = data
-  } catch (e) { /* use defaults */ }
-})
 </script>

@@ -1,0 +1,82 @@
+import { ref, computed } from 'vue'
+import { api } from '../api/client'
+
+const STORAGE_KEY = 'codepilot_user'
+
+// Restore from localStorage on module init (sync, no API call)
+const cached = (() => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') } catch { return null }
+})()
+
+const user = ref(cached)
+const loading = ref(false)
+
+async function login(userAccount, userPassword) {
+  const u = await api.login(userAccount, userPassword)
+  user.value = u
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(u))
+  return u
+}
+
+async function register(userAccount, userPassword, checkPassword) {
+  await api.register(userAccount, userPassword, checkPassword)
+  const u = await api.login(userAccount, userPassword)
+  user.value = u
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(u))
+  return u
+}
+
+async function logout() {
+  try { await api.logout() } catch {}
+  user.value = null
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+async function fetchCurrentUser() {
+  loading.value = true
+  try {
+    const u = await api.getLoginUser()
+    user.value = u
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(u))
+    return u
+  } catch {
+    // Server verification failed — keep localStorage cache for offline display,
+    // but clear the reactive state so router guards will block protected pages.
+    // Only clear localStorage on explicit logout, not on network error.
+    if (user.value === cached) {
+      // No change, keep cached user for display on public pages
+    } else {
+      user.value = null
+    }
+    return null
+  } finally {
+    loading.value = false
+  }
+}
+
+// Server-side session verification (called once at app boot)
+async function init() {
+  if (cached) {
+    // We have a cached user, mark as authenticated immediately
+    user.value = cached
+  }
+  // Verify with server (non-blocking: if fails, router guard will handle it)
+  await fetchCurrentUser()
+}
+
+export function useAuth() {
+  const isAuthenticated = computed(() => user.value !== null)
+  const isAdmin = computed(() => user.value?.userRole === 'admin')
+
+  return {
+    user,
+    isAuthenticated,
+    isAdmin,
+    loading,
+    login,
+    register,
+    logout,
+    fetchCurrentUser,
+    init,
+  }
+}

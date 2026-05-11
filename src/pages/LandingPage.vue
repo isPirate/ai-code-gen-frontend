@@ -176,8 +176,10 @@ import { useRouter } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 import AppFooter from '../components/AppFooter.vue'
 import { Sparkles, Paperclip, Code, ArrowRight, ArrowUp } from 'lucide-vue-next'
+import { useAuth } from '../stores/auth'
 
 const router = useRouter()
+const auth = useAuth()
 const prompt = ref('')
 const showLoginPrompt = ref(false)
 
@@ -188,9 +190,7 @@ const steps = [
 ]
 
 function handleGenerate() {
-  const user = localStorage.getItem('codepilot_user')
-  if (user) {
-    // User is logged in, go to editor with prompt
+  if (auth.isAuthenticated.value) {
     router.push({ path: '/editor', query: { prompt: prompt.value } })
   } else {
     showLoginPrompt.value = true

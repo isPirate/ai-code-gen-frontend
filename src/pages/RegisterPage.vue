@@ -1,20 +1,20 @@
 <template>
-  <div class="flex w-full h-screen bg-[var(--surface-primary)]">
+  <div class="flex w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
     <!-- Brand Panel -->
     <div class="relative flex flex-col justify-between gap-[32px] w-[560px] h-full p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E84A1A] to-[#A82808] overflow-hidden">
-      <div class="absolute w-[280px] h-[280px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-60px;right:-20px"></div>
-      <div class="absolute w-[220px] h-[220px] rounded-full bg-gradient-radial from-white/16 to-transparent" style="top:400px;left:-60px"></div>
-      <div class="absolute w-[180px] h-[180px] rounded-full bg-gradient-radial from-white/14 to-transparent" style="top:550px;right:-20px"></div>
-      <div class="absolute w-[90px] h-[90px] rounded-[20px] bg-white/8 rotate-[25deg]" style="top:200px;left:60px"></div>
-      <div class="absolute w-[70px] h-[70px] rounded-[16px] bg-white/6 -rotate-[15deg]" style="top:350px;right:20px"></div>
-      <div class="absolute w-[50px] h-[50px] rounded-[12px] bg-white/10 rotate-[35deg]" style="top:120px;right:10px"></div>
-      <div class="absolute w-[8px] h-[8px] rounded-full bg-white/20" style="top:100px;left:140px"></div>
-      <div class="absolute w-[6px] h-[6px] rounded-full bg-white/15" style="top:480px;right:20px"></div>
-      <div class="absolute w-[10px] h-[10px] rounded-full bg-white/15" style="top:700px;left:80px"></div>
-      <div class="absolute w-[5px] h-[5px] rounded-full bg-white/20" style="top:280px;right:20px"></div>
-      <div class="absolute w-[7px] h-[7px] rounded-full bg-white/12" style="top:800px;left:280px"></div>
-      <div class="absolute w-[140px] h-[140px] rounded-full border border-white/12" style="top:150px;left:-30px"></div>
-      <div class="absolute w-[100px] h-[100px] rounded-full border border-white/10" style="top:650px;right:10px"></div>
+      <div class="absolute pointer-events-none w-[280px] h-[280px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-60px;right:-20px"></div>
+      <div class="absolute pointer-events-none w-[220px] h-[220px] rounded-full bg-gradient-radial from-white/16 to-transparent" style="top:400px;left:-60px"></div>
+      <div class="absolute pointer-events-none w-[180px] h-[180px] rounded-full bg-gradient-radial from-white/14 to-transparent" style="top:550px;right:-20px"></div>
+      <div class="absolute pointer-events-none w-[90px] h-[90px] rounded-[20px] bg-white/8 rotate-[25deg]" style="top:200px;left:60px"></div>
+      <div class="absolute pointer-events-none w-[70px] h-[70px] rounded-[16px] bg-white/6 -rotate-[15deg]" style="top:350px;right:20px"></div>
+      <div class="absolute pointer-events-none w-[50px] h-[50px] rounded-[12px] bg-white/10 rotate-[35deg]" style="top:120px;right:10px"></div>
+      <div class="absolute pointer-events-none w-[8px] h-[8px] rounded-full bg-white/20" style="top:100px;left:140px"></div>
+      <div class="absolute pointer-events-none w-[6px] h-[6px] rounded-full bg-white/15" style="top:480px;right:20px"></div>
+      <div class="absolute pointer-events-none w-[10px] h-[10px] rounded-full bg-white/15" style="top:700px;left:80px"></div>
+      <div class="absolute pointer-events-none w-[5px] h-[5px] rounded-full bg-white/20" style="top:280px;right:20px"></div>
+      <div class="absolute pointer-events-none w-[7px] h-[7px] rounded-full bg-white/12" style="top:800px;left:280px"></div>
+      <div class="absolute pointer-events-none w-[140px] h-[140px] rounded-full border border-white/12" style="top:150px;left:-30px"></div>
+      <div class="absolute pointer-events-none w-[100px] h-[100px] rounded-full border border-white/10" style="top:650px;right:10px"></div>
 
       <div class="relative flex flex-col gap-[24px] bg-white/5 rounded-[24px] p-[36px] shadow-[0_4px_24px_#00000020]">
         <span class="font-heading text-[32px] font-bold text-white tracking-[-0.5px]">CodePilot</span>
@@ -56,12 +56,12 @@
 
     <!-- Register Form -->
     <div class="relative flex items-center justify-center flex-1 h-full p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
-      <div class="absolute w-[280px] h-[280px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:80px;right:40px"></div>
-      <div class="absolute w-[220px] h-[220px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-30px"></div>
-      <div class="absolute w-[50px] h-[50px] rounded-[12px] bg-[#FF5C0006] -rotate-[20deg]" style="top:420px;right:20px"></div>
-      <div class="absolute w-[7px] h-[7px] rounded-full bg-[#FF5C0015]" style="top:300px;right:40%"></div>
-      <div class="absolute w-[9px] h-[9px] rounded-full bg-[#FF5C0012]" style="top:180px;left:60px"></div>
-      <div class="absolute w-[35px] h-[35px] rounded-[8px] bg-[#FF5C0005] rotate-[25deg]" style="bottom:80px;right:20px"></div>
+      <div class="absolute pointer-events-none w-[280px] h-[280px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:80px;right:40px"></div>
+      <div class="absolute pointer-events-none w-[220px] h-[220px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-30px"></div>
+      <div class="absolute pointer-events-none w-[50px] h-[50px] rounded-[12px] bg-[#FF5C0006] -rotate-[20deg]" style="top:420px;right:20px"></div>
+      <div class="absolute pointer-events-none w-[7px] h-[7px] rounded-full bg-[#FF5C0015]" style="top:300px;right:40%"></div>
+      <div class="absolute pointer-events-none w-[9px] h-[9px] rounded-full bg-[#FF5C0012]" style="top:180px;left:60px"></div>
+      <div class="absolute pointer-events-none w-[35px] h-[35px] rounded-[8px] bg-[#FF5C0005] rotate-[25deg]" style="bottom:80px;right:20px"></div>
 
       <div class="flex flex-col gap-[28px] w-full max-w-[480px]">
         <div>
@@ -71,19 +71,25 @@
 
         <form @submit.prevent="handleRegister" class="flex flex-col gap-[20px] w-full">
           <div class="flex flex-col gap-[6px]">
-            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Full Name</label>
-            <input v-model="name" type="text" placeholder="John Doe" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" />
-          </div>
-          <div class="flex flex-col gap-[6px]">
-            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Email</label>
-            <input v-model="email" type="email" placeholder="you@example.com" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" />
+            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Account</label>
+            <input v-model="userAccount" type="text" placeholder="Choose an account name" class="w-full h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" />
           </div>
           <div class="flex flex-col gap-[6px]">
             <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Password</label>
-            <div class="flex items-center justify-between h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)] transition-colors">
-              <input v-model="password" :type="showPass ? 'text' : 'password'" placeholder="Create a password" class="flex-1 font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
-              <button type="button" @click="showPass = !showPass" class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]">
+            <div class="flex items-center h-[44px] rounded-[8px] border border-[var(--border-subtle)] focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)] transition-colors overflow-hidden">
+              <input v-model="password" :type="showPass ? 'text' : 'password'" placeholder="Create a password" class="flex-1 h-full px-[14px] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
+              <button type="button" @click="showPass = !showPass" class="flex-shrink-0 h-full px-[10px] flex items-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors cursor-pointer">
                 <EyeOff v-if="showPass" :size="18" />
+                <Eye v-else :size="18" />
+              </button>
+            </div>
+          </div>
+          <div class="flex flex-col gap-[6px]">
+            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Confirm Password</label>
+            <div class="flex items-center h-[44px] rounded-[8px] border border-[var(--border-subtle)] focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)] transition-colors overflow-hidden">
+              <input v-model="checkPassword" :type="showConfirm ? 'text' : 'password'" placeholder="Confirm your password" class="flex-1 h-full px-[14px] font-body text-[14px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
+              <button type="button" @click="showConfirm = !showConfirm" class="flex-shrink-0 h-full px-[10px] flex items-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors cursor-pointer">
+                <EyeOff v-if="showConfirm" :size="18" />
                 <Eye v-else :size="18" />
               </button>
             </div>
@@ -135,21 +141,28 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
-import { mockApi } from '../api/mock.js'
+import { useAuth } from '../stores/auth'
 
 const router = useRouter()
-const name = ref('')
-const email = ref('')
+const auth = useAuth()
+
+const userAccount = ref('')
 const password = ref('')
+const checkPassword = ref('')
 const showPass = ref(false)
+const showConfirm = ref(false)
 const agreeTerms = ref(false)
 const loading = ref(false)
 const error = ref('')
 
 async function handleRegister() {
   error.value = ''
-  if (!name.value || !email.value || !password.value) {
+  if (!userAccount.value || !password.value || !checkPassword.value) {
     error.value = 'Please fill in all fields'
+    return
+  }
+  if (password.value !== checkPassword.value) {
+    error.value = 'Passwords do not match'
     return
   }
   if (!agreeTerms.value) {
@@ -158,8 +171,8 @@ async function handleRegister() {
   }
   loading.value = true
   try {
-    const result = await mockApi.register({ name: name.value, email: email.value, password: password.value })
-    if (result.user.role === 'admin') {
+    const user = await auth.register(userAccount.value, password.value, checkPassword.value)
+    if (user.userRole === 'admin') {
       router.push('/admin')
     } else {
       router.push('/dashboard')
