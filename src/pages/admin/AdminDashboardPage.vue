@@ -2,24 +2,21 @@
   <div class="flex w-full h-screen bg-[var(--surface-secondary)]">
     <AdminSidebar :navItems="navItems" />
 
-    <!-- Main Content -->
     <div class="flex flex-col flex-1 h-full">
-      <!-- Top Bar -->
       <div class="flex items-center justify-between h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
         <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">Overview</h1>
         <div class="flex items-center gap-[12px]">
           <button class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
-            <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+            <Calendar :size="16" />
             Last 30 days
           </button>
           <button class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[13px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
-            <span class="material-symbols-outlined text-[16px]">download</span>
+            <Download :size="16" />
             Export Report
           </button>
         </div>
       </div>
 
-      <!-- Content -->
       <div class="flex-1 overflow-auto p-[32px]">
         <div class="flex flex-col gap-[24px] w-full">
           <!-- Stats Row -->
@@ -27,9 +24,8 @@
             <div v-for="stat in stats" :key="stat.label" class="flex flex-col gap-[8px] flex-1 bg-white rounded-[12px] border border-[var(--border-subtle)] p-[20px_24px]">
               <div class="flex items-center justify-between">
                 <span class="font-caption text-[12px] text-[var(--foreground-muted)] uppercase tracking-wide">{{ stat.label }}</span>
-                <span :class="['material-symbols-outlined text-[20px]', stat.trend > 0 ? 'text-green-500' : 'text-red-500']">
-                  {{ stat.trend > 0 ? 'trending_up' : 'trending_down' }}
-                </span>
+                <TrendingUp v-if="stat.trend > 0" :size="20" class="text-green-500" />
+                <TrendingDown v-else :size="20" class="text-red-500" />
               </div>
               <span class="font-heading text-[32px] font-bold text-[var(--foreground-primary)]">{{ stat.value }}</span>
               <span :class="['font-body text-[12px]', stat.trend > 0 ? 'text-green-600' : 'text-red-600']">
@@ -40,13 +36,11 @@
 
           <!-- Charts Row -->
           <div class="flex gap-[20px] w-full flex-1">
-            <!-- User Growth Chart -->
             <div class="flex flex-col gap-[16px] flex-1 bg-white rounded-[12px] border border-[var(--border-subtle)] p-[20px_24px]">
               <div class="flex items-center justify-between">
                 <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">User Growth</h3>
                 <span class="font-caption text-[11px] text-[var(--foreground-muted)]">Monthly</span>
               </div>
-              <!-- Bar Chart -->
               <div class="flex-1 flex items-end gap-[12px] min-h-[200px]">
                 <div v-for="(val, i) in statsData.userGrowth" :key="i" class="flex-1 flex flex-col items-center gap-[6px]">
                   <div class="w-full rounded-t-[6px] bg-[var(--accent-primary)] transition-all" :style="{ height: (val / 1500 * 100) + '%', opacity: 0.3 + (val / 1500 * 0.7) }"></div>
@@ -54,8 +48,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Project Growth Chart -->
             <div class="flex flex-col gap-[16px] flex-1 bg-white rounded-[12px] border border-[var(--border-subtle)] p-[20px_24px]">
               <div class="flex items-center justify-between">
                 <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">Project Growth</h3>
@@ -71,12 +63,12 @@
           </div>
 
           <!-- Recent Activity -->
-          <div class="flex flex-col gap-[4px] bg-white rounded-[12px] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-            <div class="flex items-center justify-between p-[16px_24px]">
+          <div class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden">
+            <div class="flex items-center justify-between p-[16px_24px] border-b border-[var(--border-subtle)]">
               <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">Recent Activity</h3>
               <a href="#" class="font-body text-[13px] text-[var(--accent-primary)] hover:underline">View all</a>
             </div>
-            <div v-for="activity in statsData.recentActivity" :key="activity.id" class="flex items-center justify-between p-[14px_24px] hover:bg-[var(--surface-secondary)] transition-colors">
+            <div v-for="activity in statsData.recentActivity" :key="activity.id" class="flex items-center justify-between p-[14px_24px] hover:bg-[var(--surface-secondary)] transition-colors border-b border-[var(--border-subtle)] last:border-b-0">
               <div class="flex items-center gap-[12px]">
                 <div class="w-[32px] h-[32px] rounded-full bg-[var(--surface-secondary)] flex items-center justify-center">
                   <span class="font-body text-[13px] font-medium text-[var(--foreground-secondary)]">{{ activity.user[0] }}</span>
@@ -100,13 +92,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import AdminSidebar from '../../components/AdminSidebar.vue'
+import { LayoutDashboard, Users, Folder, Settings, Calendar, Download, TrendingUp, TrendingDown } from 'lucide-vue-next'
 import { mockApi } from '../../api/mock.js'
 
 const navItems = [
-  { to: '/admin', label: 'Dashboard', icon: 'dashboard' },
-  { to: '/admin/users', label: 'Users', icon: 'group' },
-  { to: '/admin/projects', label: 'Projects', icon: 'folder' },
-  { to: '/admin/settings', label: 'Settings', icon: 'settings' },
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/projects', label: 'Projects', icon: Folder },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

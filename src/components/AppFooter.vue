@@ -1,18 +1,15 @@
 <template>
   <footer class="flex flex-col gap-[28px] w-full border-t border-[var(--border-subtle)] px-[80px] py-[40px]">
     <div class="flex justify-between w-full">
-      <!-- Brand -->
       <div class="flex flex-col gap-[8px]">
         <div class="flex items-center gap-[10px]">
-          <span class="material-symbols-outlined text-[24px] text-[var(--accent-primary)]">sparkles</span>
+          <Sparkles :size="24" class="text-[var(--accent-primary)]" />
           <span class="font-heading text-[20px] font-bold text-[var(--foreground-primary)]">CodePilot</span>
         </div>
         <p class="font-body text-[13px] text-[var(--foreground-muted)] leading-relaxed max-w-[280px]">
           AI-powered zero-code platform. Turn your ideas into production-ready applications.
         </p>
       </div>
-
-      <!-- Links -->
       <div class="flex gap-[64px]">
         <div class="flex flex-col gap-[8px]">
           <span class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Product</span>
@@ -37,8 +34,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Bottom -->
     <div class="flex items-center justify-between w-full pt-[24px] border-t border-[var(--border-subtle)]">
       <span class="font-caption text-[12px] text-[var(--foreground-muted)]">&copy; 2026 CodePilot. All rights reserved.</span>
       <div class="flex items-center gap-[16px]">
@@ -49,3 +44,7 @@
     </div>
   </footer>
 </template>
+
+<script setup>
+import { Sparkles } from 'lucide-vue-next'
+</script>

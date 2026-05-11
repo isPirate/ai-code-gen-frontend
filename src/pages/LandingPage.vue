@@ -18,22 +18,38 @@
             v-model="prompt"
             placeholder="Describe the app you want to build..."
             class="w-full min-h-[80px] font-body text-[18px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] resize-none outline-none bg-transparent"
+            @keydown.enter.exact="handleGenerate"
           ></textarea>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-[12px]">
               <button class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
-                <span class="material-symbols-outlined text-[16px]">attach_file</span>
+                <Paperclip :size="16" />
                 Attach
               </button>
               <button class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
-                <span class="material-symbols-outlined text-[16px]">code</span>
+                <Code :size="16" />
                 Stack
               </button>
             </div>
-            <button class="flex items-center gap-[8px] px-[20px] py-[10px] rounded-[12px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
+            <button @click="handleGenerate" class="flex items-center gap-[8px] px-[20px] py-[10px] rounded-[12px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
               <span>Generate</span>
-              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              <ArrowRight :size="18" />
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Prompt Modal -->
+      <div v-if="showLoginPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="showLoginPrompt = false">
+        <div class="bg-white rounded-[16px] p-[32px] w-[420px] shadow-xl text-center">
+          <Sparkles :size="40" class="text-[var(--accent-primary)] mx-auto mb-[16px]" />
+          <h3 class="font-heading text-[22px] font-bold text-[var(--foreground-primary)] mb-[8px]">Ready to build?</h3>
+          <p class="font-body text-[14px] text-[var(--foreground-secondary)] mb-[24px]">
+            Sign up or log in to start generating apps with AI.
+          </p>
+          <div class="flex gap-[12px] justify-center">
+            <router-link to="/login" class="px-[24px] py-[10px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors">Log in</router-link>
+            <router-link to="/register" class="px-[24px] py-[10px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">Get Started</router-link>
           </div>
         </div>
       </div>
@@ -51,21 +67,18 @@
     <!-- Product Mockup -->
     <section class="flex flex-col items-center gap-[16px] w-full pt-[48px] px-[120px] pb-[64px]">
       <div class="flex w-full h-[560px] rounded-[12px] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-hidden shadow-[0_4px_6px_#00000008,0_16px_40px_#00000012]">
-        <!-- Left: Chat Mock -->
         <div class="flex flex-col w-[360px] bg-white border-r border-[var(--border-subtle)]">
           <div class="flex items-center h-[48px] px-[16px] border-b border-[var(--border-subtle)] gap-[8px]">
-            <span class="material-symbols-outlined text-[18px] text-[var(--accent-primary)]">sparkles</span>
+            <Sparkles :size="18" class="text-[var(--accent-primary)]" />
             <span class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">AI Chat</span>
           </div>
           <div class="flex flex-col gap-[16px] p-[16px] flex-1 overflow-auto">
             <div class="flex gap-[8px]">
               <div class="w-[28px] h-[28px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-[16px] text-white">sparkles</span>
+                <Sparkles :size="14" class="text-white" />
               </div>
-              <div class="flex flex-col gap-[4px]">
-                <div class="bg-[var(--surface-secondary)] rounded-[12px] rounded-tl-[4px] p-[10px_14px] font-body text-[13px] text-[var(--foreground-primary)] leading-relaxed max-w-[260px]">
-                  What kind of app would you like to build today?
-                </div>
+              <div class="bg-[var(--surface-secondary)] rounded-[12px] rounded-tl-[4px] p-[10px_14px] font-body text-[13px] text-[var(--foreground-primary)] leading-relaxed max-w-[260px]">
+                What kind of app would you like to build today?
               </div>
             </div>
             <div class="flex gap-[8px] justify-end">
@@ -75,24 +88,20 @@
             </div>
             <div class="flex gap-[8px]">
               <div class="w-[28px] h-[28px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-[16px] text-white">sparkles</span>
+                <Sparkles :size="14" class="text-white" />
               </div>
-              <div class="flex flex-col gap-[4px]">
-                <div class="bg-[var(--surface-secondary)] rounded-[12px] rounded-tl-[4px] p-[10px_14px] font-body text-[13px] text-[var(--foreground-primary)] leading-relaxed max-w-[260px]">
-                  Here's your dashboard! I've added analytics charts, user metrics, and a sidebar navigation.
-                </div>
+              <div class="bg-[var(--surface-secondary)] rounded-[12px] rounded-tl-[4px] p-[10px_14px] font-body text-[13px] text-[var(--foreground-primary)] leading-relaxed max-w-[260px]">
+                Here's your dashboard! I've added analytics charts, user metrics, and a sidebar navigation.
               </div>
             </div>
           </div>
           <div class="flex items-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)]">
             <input placeholder="Type your message..." class="flex-1 font-body text-[13px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
             <button class="w-[32px] h-[32px] rounded-[8px] bg-[var(--accent-primary)] flex items-center justify-center">
-              <span class="material-symbols-outlined text-[16px] text-white">arrow_upward</span>
+              <ArrowUp :size="16" class="text-white" />
             </button>
           </div>
         </div>
-
-        <!-- Right: Preview -->
         <div class="flex flex-col flex-1 bg-[var(--surface-secondary)]">
           <div class="flex items-center h-[48px] px-[16px] border-b border-[var(--border-subtle)] bg-white gap-[16px]">
             <div class="flex items-center gap-[8px]">
@@ -112,12 +121,8 @@
                 <div class="flex items-center gap-[8px] px-[16px] border-b-[2px] border-[var(--accent-primary)]">
                   <span class="font-body text-[13px] font-medium text-[var(--accent-primary)]">Overview</span>
                 </div>
-                <div class="flex items-center gap-[8px] px-[16px]">
-                  <span class="font-body text-[13px] text-[var(--foreground-muted)]">Analytics</span>
-                </div>
-                <div class="flex items-center gap-[8px] px-[16px]">
-                  <span class="font-body text-[13px] text-[var(--foreground-muted)]">Reports</span>
-                </div>
+                <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Analytics</span></div>
+                <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Reports</span></div>
               </div>
               <div class="p-[20px] grid grid-cols-4 gap-[16px]">
                 <div v-for="i in 4" :key="i" class="bg-[var(--surface-secondary)] rounded-[8px] p-[14px]">
@@ -157,7 +162,7 @@
       </p>
       <router-link to="/register" class="flex items-center gap-[8px] px-[32px] py-[14px] rounded-full bg-[var(--accent-primary)] font-body text-[16px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
         Get Started — It's Free
-        <span class="material-symbols-outlined text-[18px]">arrow_right_alt</span>
+        <ArrowRight :size="18" />
       </router-link>
     </section>
 
@@ -167,14 +172,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 import AppFooter from '../components/AppFooter.vue'
+import { Sparkles, Paperclip, Code, ArrowRight, ArrowUp } from 'lucide-vue-next'
 
+const router = useRouter()
 const prompt = ref('')
+const showLoginPrompt = ref(false)
 
 const steps = [
   { title: 'Describe your idea', desc: 'Tell the AI what you want to build using natural language. No coding required.' },
   { title: 'AI generates it', desc: 'Watch as the AI creates your app in real-time with production-quality code.' },
   { title: 'Deploy & share', desc: 'One-click deploy to production. Export full code anytime you want.' },
 ]
+
+function handleGenerate() {
+  const user = localStorage.getItem('codepilot_user')
+  if (user) {
+    // User is logged in, go to editor with prompt
+    router.push({ path: '/editor', query: { prompt: prompt.value } })
+  } else {
+    showLoginPrompt.value = true
+  }
+}
 </script>

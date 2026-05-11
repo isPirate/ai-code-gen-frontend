@@ -2,14 +2,11 @@
   <div class="flex w-full h-screen bg-[var(--surface-secondary)]">
     <AdminSidebar :navItems="navItems" />
 
-    <!-- Main Content -->
     <div class="flex flex-col flex-1 h-full">
-      <!-- Top Bar -->
       <div class="flex items-center h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
         <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">System Settings</h1>
       </div>
 
-      <!-- Content -->
       <div class="flex-1 overflow-auto p-[32px]">
         <div class="flex flex-col gap-[24px] w-full max-w-[800px]">
           <!-- AI Model Configuration -->
@@ -18,7 +15,6 @@
               <h3 class="font-body text-[16px] font-semibold text-[var(--foreground-primary)]">AI Model Configuration</h3>
               <p class="font-body text-[13px] text-[var(--foreground-secondary)] mt-[4px]">Configure the AI models used for code generation</p>
             </div>
-
             <div class="flex flex-col gap-[16px]">
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Default Model</label>
@@ -29,7 +25,6 @@
                   <option value="deepseek-v3">DeepSeek V3</option>
                 </select>
               </div>
-
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Temperature</label>
                 <div class="flex items-center gap-[12px]">
@@ -37,18 +32,17 @@
                   <span class="font-body text-[14px] text-[var(--foreground-primary)] w-[36px] text-right">{{ aiConfig.temperature }}</span>
                 </div>
               </div>
-
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Max Tokens</label>
                 <input v-model.number="aiConfig.maxTokens" type="number" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)]" />
               </div>
-
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">API Key</label>
                 <div class="flex items-center gap-[12px]">
                   <input :type="showKey ? 'text' : 'password'" v-model="aiConfig.apiKey" class="flex-1 h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)]" />
-                  <button @click="showKey = !showKey" class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]">
-                    <span class="material-symbols-outlined text-[20px]">{{ showKey ? 'visibility_off' : 'visibility' }}</span>
+                  <button type="button" @click="showKey = !showKey" class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]">
+                    <EyeOff v-if="showKey" :size="20" />
+                    <Eye v-else :size="20" />
                   </button>
                 </div>
               </div>
@@ -61,23 +55,19 @@
               <h3 class="font-body text-[16px] font-semibold text-[var(--foreground-primary)]">Usage Limits</h3>
               <p class="font-body text-[13px] text-[var(--foreground-secondary)] mt-[4px]">Set usage quotas for different user tiers</p>
             </div>
-
             <div class="flex flex-col gap-[16px]">
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Free Tier - Monthly Generations</label>
                 <input v-model.number="limits.freeGenerations" type="number" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)]" />
               </div>
-
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Pro Tier - Monthly Generations</label>
                 <input v-model.number="limits.proGenerations" type="number" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)]" />
               </div>
-
               <div class="flex flex-col gap-[6px]">
                 <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Max Project Size (MB)</label>
                 <input v-model.number="limits.maxProjectSize" type="number" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] outline-none focus:border-[var(--accent-primary)]" />
               </div>
-
               <label class="flex items-center gap-[8px] cursor-pointer mt-[4px]">
                 <input type="checkbox" v-model="limits.requireEmailVerification" class="w-[16px] h-[16px] rounded-[4px] accent-[var(--accent-primary)]" />
                 <span class="font-body text-[13px] text-[var(--foreground-secondary)]">Require email verification before first generation</span>
@@ -85,7 +75,6 @@
             </div>
           </div>
 
-          <!-- Action Buttons -->
           <div class="flex justify-end gap-[12px] w-full">
             <button class="px-[20px] py-[10px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
               Reset to Default
@@ -103,12 +92,13 @@
 <script setup>
 import { ref } from 'vue'
 import AdminSidebar from '../../components/AdminSidebar.vue'
+import { LayoutDashboard, Users, Folder, Settings, Eye, EyeOff } from 'lucide-vue-next'
 
 const navItems = [
-  { to: '/admin', label: 'Dashboard', icon: 'dashboard' },
-  { to: '/admin/users', label: 'Users', icon: 'group' },
-  { to: '/admin/projects', label: 'Projects', icon: 'folder' },
-  { to: '/admin/settings', label: 'Settings', icon: 'settings' },
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/projects', label: 'Projects', icon: Folder },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 const showKey = ref(false)
