@@ -3,17 +3,17 @@
     <Navbar />
 
     <!-- Hero Section -->
-    <section class="flex flex-col items-center gap-[48px] w-full py-[100px] px-[120px]">
-      <h1 class="font-heading text-[72px] font-bold text-[var(--foreground-primary)] text-center leading-[1.1]">
+    <section class="flex flex-col items-center gap-[32px] lg:gap-[48px] w-full py-[60px] px-[24px] lg:py-[100px] lg:px-[120px]">
+      <h1 class="font-heading text-[40px] md:text-[56px] lg:text-[72px] font-bold text-[var(--foreground-primary)] text-center leading-[1.1]">
         Build anything with AI
       </h1>
-      <p class="font-body text-[20px] text-[var(--foreground-secondary)] text-center leading-[1.5] max-w-[700px]">
+      <p class="font-body text-[16px] lg:text-[20px] text-[var(--foreground-secondary)] text-center leading-[1.5] max-w-[700px]">
         Describe your idea in plain language. Get production-ready websites, apps, and tools in seconds.
       </p>
 
       <!-- Prompt Box -->
-      <div class="flex flex-col w-[1100px] max-w-full p-[3px] rounded-[20px] bg-gradient-to-br from-[var(--accent-primary)] via-[#FFB366] to-[var(--accent-primary)] shadow-[0_8px_40px_#FF5C0022,0_32px_80px_#FF5C0011]">
-        <div class="flex flex-col gap-[20px] w-full bg-white rounded-[18px] p-[28px_32px]">
+      <div class="flex flex-col w-full max-w-[1100px] p-[3px] rounded-[20px] bg-gradient-to-br from-[var(--accent-primary)] via-[#FFB366] to-[var(--accent-primary)] shadow-[0_8px_40px_#FF5C0022,0_32px_80px_#FF5C0011]">
+        <div class="flex flex-col gap-[16px] lg:gap-[20px] w-full bg-white rounded-[18px] p-[20px] lg:p-[28px_32px]">
           <textarea
             v-model="prompt"
             placeholder="Describe the app you want to build..."
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Trust Row -->
-      <div class="flex items-center gap-[32px]">
+      <div class="flex flex-wrap items-center justify-center gap-[16px] lg:gap-[32px]">
         <span class="font-body text-[14px] text-[var(--foreground-muted)]">Free to start</span>
         <span class="w-[4px] h-[4px] rounded-full bg-[var(--foreground-muted)]"></span>
         <span class="font-body text-[14px] text-[var(--foreground-muted)]">No credit card required</span>
@@ -65,9 +65,9 @@
     </section>
 
     <!-- Product Mockup -->
-    <section class="flex flex-col items-center gap-[16px] w-full pt-[48px] px-[120px] pb-[64px]">
-      <div class="flex w-full h-[560px] rounded-[12px] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-hidden shadow-[0_4px_6px_#00000008,0_16px_40px_#00000012]">
-        <div class="flex flex-col w-[360px] bg-white border-r border-[var(--border-subtle)]">
+    <section class="flex flex-col items-center gap-[16px] w-full pt-[32px] px-[24px] pb-[40px] lg:pt-[48px] lg:px-[120px] lg:pb-[64px]">
+      <div class="flex flex-col lg:flex-row w-full h-auto lg:h-[560px] rounded-[12px] border border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-hidden shadow-[0_4px_6px_#00000008,0_16px_40px_#00000012]">
+        <div class="flex flex-col w-full lg:w-[360px] bg-white border-r lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)]">
           <div class="flex items-center h-[48px] px-[16px] border-b border-[var(--border-subtle)] gap-[8px]">
             <Sparkles :size="18" class="text-[var(--accent-primary)]" />
             <span class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">AI Chat</span>
@@ -124,7 +124,7 @@
                 <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Analytics</span></div>
                 <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Reports</span></div>
               </div>
-              <div class="p-[20px] grid grid-cols-4 gap-[16px]">
+              <div class="p-[20px] grid grid-cols-2 lg:grid-cols-4 gap-[12px] lg:gap-[16px]">
                 <div v-for="i in 4" :key="i" class="bg-[var(--surface-secondary)] rounded-[8px] p-[14px]">
                   <div class="w-full h-[8px] rounded-full bg-[#E5E7EB] mb-[8px]"></div>
                   <div class="w-2/3 h-[12px] rounded-full bg-[#D1D5DB] mb-[4px]"></div>
@@ -141,9 +141,9 @@
     </section>
 
     <!-- How It Works -->
-    <section class="flex flex-col items-center gap-[48px] w-full py-[64px] px-[120px]">
-      <h2 class="font-heading text-[36px] font-bold text-[var(--foreground-primary)] text-center">How it works</h2>
-      <div class="flex gap-[32px] w-full">
+    <section class="flex flex-col items-center gap-[32px] lg:gap-[48px] w-full py-[40px] px-[24px] lg:py-[64px] lg:px-[120px]">
+      <h2 class="font-heading text-[28px] lg:text-[36px] font-bold text-[var(--foreground-primary)] text-center">How it works</h2>
+      <div class="flex flex-col md:flex-row gap-[24px] lg:gap-[32px] w-full">
         <div v-for="(step, i) in steps" :key="i" class="flex flex-col items-center gap-[20px] flex-1">
           <div class="w-[64px] h-[64px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center">
             <span class="font-heading text-[28px] font-bold text-white">{{ i + 1 }}</span>
@@ -155,9 +155,9 @@
     </section>
 
     <!-- CTA -->
-    <section class="flex flex-col items-center gap-[28px] w-full bg-[var(--surface-secondary)] py-[60px] px-[80px]">
-      <h2 class="font-heading text-[36px] font-bold text-[var(--foreground-primary)] text-center">Ready to create something?</h2>
-      <p class="font-body text-[16px] text-[var(--foreground-secondary)] text-center leading-[1.6] max-w-[480px]">
+    <section class="flex flex-col items-center gap-[20px] lg:gap-[28px] w-full bg-[var(--surface-secondary)] py-[40px] px-[24px] lg:py-[60px] lg:px-[80px]">
+      <h2 class="font-heading text-[28px] lg:text-[36px] font-bold text-[var(--foreground-primary)] text-center">Ready to create something?</h2>
+      <p class="font-body text-[14px] lg:text-[16px] text-[var(--foreground-secondary)] text-center leading-[1.6] max-w-[480px]">
         Join thousands of creators shipping real products with AI.
       </p>
       <router-link to="/register" class="flex items-center gap-[8px] px-[32px] py-[14px] rounded-full bg-[var(--accent-primary)] font-body text-[16px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">

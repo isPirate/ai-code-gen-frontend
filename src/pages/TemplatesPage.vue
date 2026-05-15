@@ -3,8 +3,8 @@
     <AppSidebar :navItems="navItems" />
 
     <div class="flex flex-col flex-1 h-full">
-      <div class="flex items-center justify-between h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
-        <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">Templates</h1>
+      <div class="flex items-center justify-between h-[64px] px-[16px] lg:px-[32px] bg-white border-b border-[var(--border-subtle)] gap-[12px]">
+        <h1 class="font-heading text-[20px] lg:text-[24px] font-bold text-[var(--foreground-primary)]">Templates</h1>
         <div class="flex items-center gap-[12px]">
           <div class="flex items-center gap-[8px] h-[36px] px-[12px] rounded-[8px] border border-[var(--border-subtle)] w-[220px]">
             <Search :size="16" class="text-[var(--foreground-muted)]" />
@@ -13,10 +13,10 @@
         </div>
       </div>
 
-      <div class="flex-1 overflow-auto p-[32px]">
-        <div class="flex flex-col gap-[24px] w-full">
+      <div class="flex-1 overflow-auto p-[20px] lg:p-[32px]">
+        <div class="flex flex-col gap-[20px] lg:gap-[24px] w-full">
           <!-- Category Tabs -->
-          <div class="flex gap-[8px]">
+          <div class="flex flex-wrap gap-[6px] lg:gap-[8px]">
             <button
               v-for="cat in categories"
               :key="cat.value"
@@ -34,7 +34,7 @@
 
           <!-- Template Grid -->
           <div class="flex flex-col gap-[20px] w-full">
-            <div v-for="(row, ri) in templateRows" :key="ri" class="flex gap-[20px] w-full">
+            <div v-for="(row, ri) in templateRows" :key="ri" class="flex flex-col md:flex-row gap-[16px] lg:gap-[20px] w-full">
               <div
                 v-for="tpl in row"
                 :key="tpl.id"

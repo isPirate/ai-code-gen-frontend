@@ -1,10 +1,10 @@
 <template>
-  <header class="flex items-center justify-between h-[64px] px-[80px] w-full">
+  <header class="flex items-center justify-between h-[64px] px-[24px] lg:px-[80px] w-full">
     <div class="flex items-center gap-[10px]">
       <Sparkles :size="24" class="text-[var(--accent-primary)]" />
       <span class="font-heading text-[24px] font-bold text-[var(--accent-primary)]">CodePilot</span>
     </div>
-    <div class="flex items-center gap-[32px]">
+    <div class="hidden lg:flex items-center gap-[32px]">
       <a href="#features" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Features</a>
       <a href="#templates" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Templates</a>
       <a href="#pricing" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Pricing</a>

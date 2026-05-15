@@ -1,7 +1,7 @@
 <template>
-  <div class="flex w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
+  <div class="flex flex-col lg:flex-row w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
     <!-- Brand Panel -->
-    <div class="relative flex flex-col justify-between gap-[32px] w-[560px] h-full p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E84A1A] to-[#A82808] overflow-hidden">
+    <div class="relative flex flex-col justify-between gap-[24px] lg:gap-[32px] w-full lg:w-[560px] h-full p-[32px_24px] lg:p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E84A1A] to-[#A82808] overflow-hidden">
       <div class="absolute pointer-events-none w-[280px] h-[280px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-60px;right:-20px"></div>
       <div class="absolute pointer-events-none w-[220px] h-[220px] rounded-full bg-gradient-radial from-white/16 to-transparent" style="top:400px;left:-60px"></div>
       <div class="absolute pointer-events-none w-[180px] h-[180px] rounded-full bg-gradient-radial from-white/14 to-transparent" style="top:550px;right:-20px"></div>
@@ -16,17 +16,17 @@
       <div class="absolute pointer-events-none w-[140px] h-[140px] rounded-full border border-white/12" style="top:150px;left:-30px"></div>
       <div class="absolute pointer-events-none w-[100px] h-[100px] rounded-full border border-white/10" style="top:650px;right:10px"></div>
 
-      <div class="relative flex flex-col gap-[24px] bg-white/5 rounded-[24px] p-[36px] shadow-[0_4px_24px_#00000020]">
+      <div class="relative flex flex-col gap-[20px] lg:gap-[24px] bg-white/5 rounded-[24px] p-[24px] lg:p-[36px] shadow-[0_4px_24px_#00000020]">
         <span class="font-heading text-[32px] font-bold text-white tracking-[-0.5px]">CodePilot</span>
-        <h2 class="font-heading text-[40px] font-bold text-white leading-[1.2] tracking-[-0.5px] max-w-[420px]">
+        <h2 class="font-heading text-[28px] lg:text-[40px] font-bold text-white leading-[1.2] tracking-[-0.5px] max-w-[420px]">
           Start building<br/>today, for free
         </h2>
-        <p class="font-body text-[16px] text-white/70 leading-[1.7] max-w-[420px]">
+        <p class="font-body text-[14px] lg:text-[16px] text-white/70 leading-[1.7] max-w-[420px]">
           No credit card required. Get started<br/>with our generous free tier.
         </p>
       </div>
 
-      <div class="relative flex flex-col gap-[16px] w-full">
+      <div class="relative hidden lg:flex flex-col gap-[16px] w-full">
         <div class="flex flex-col gap-[12px] bg-white/6 rounded-[16px] p-[20px_24px] shadow-[0_2px_12px_#00000012]">
           <p class="font-body text-[14px] text-white/87 leading-[1.6] max-w-[400px]">
             "CodePilot helped me launch my SaaS<br/>product in just 2 days. Incredible!"
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Register Form -->
-    <div class="relative flex items-center justify-center flex-1 h-full p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
+    <div class="relative flex items-center justify-center flex-1 h-full p-[32px_24px] lg:p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
       <div class="absolute pointer-events-none w-[280px] h-[280px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:80px;right:40px"></div>
       <div class="absolute pointer-events-none w-[220px] h-[220px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-30px"></div>
       <div class="absolute pointer-events-none w-[50px] h-[50px] rounded-[12px] bg-[#FF5C0006] -rotate-[20deg]" style="top:420px;right:20px"></div>
@@ -65,8 +65,8 @@
 
       <div class="flex flex-col gap-[28px] w-full max-w-[480px]">
         <div>
-          <h1 class="font-heading text-[36px] font-bold text-[var(--foreground-primary)] tracking-[-0.5px]">Create your account</h1>
-          <p class="font-body text-[16px] text-[var(--foreground-secondary)] mt-[4px]">Start building with AI in seconds</p>
+          <h1 class="font-heading text-[28px] lg:text-[36px] font-bold text-[var(--foreground-primary)] tracking-[-0.5px]">Create your account</h1>
+          <p class="font-body text-[14px] lg:text-[16px] text-[var(--foreground-secondary)] mt-[4px]">Start building with AI in seconds</p>
         </div>
 
         <form @submit.prevent="handleRegister" class="flex flex-col gap-[20px] w-full">

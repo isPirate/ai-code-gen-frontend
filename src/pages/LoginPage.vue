@@ -1,7 +1,7 @@
 <template>
-  <div class="flex w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
+  <div class="flex flex-col lg:flex-row w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
     <!-- Brand Panel -->
-    <div class="relative flex flex-col justify-between gap-[32px] w-[560px] h-full p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E8491D] to-[#D4370A] overflow-hidden">
+    <div class="relative flex flex-col justify-between gap-[24px] lg:gap-[32px] w-full lg:w-[560px] p-[32px_24px] lg:p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E8491D] to-[#D4370A] overflow-hidden">
       <div class="absolute pointer-events-none w-[320px] h-[320px] rounded-full bg-gradient-radial from-white/15 to-transparent opacity-80" style="top:80px;left:-80px"></div>
       <div class="absolute pointer-events-none w-[200px] h-[200px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-40px;left:360px"></div>
       <div class="absolute pointer-events-none w-[160px] h-[160px] rounded-full bg-gradient-radial from-white/12 to-transparent" style="top:500px;left:400px"></div>
@@ -16,12 +16,12 @@
       <div class="absolute pointer-events-none w-[120px] h-[120px] rounded-full border border-white/15" style="top:200px;left:420px"></div>
       <div class="absolute pointer-events-none w-[180px] h-[180px] rounded-full border border-white/10" style="top:300px;left:-40px"></div>
 
-      <div class="relative flex flex-col gap-[28px] bg-white/5 rounded-[24px] p-[40px] shadow-[0_4px_24px_#00000020]">
+      <div class="relative flex flex-col gap-[20px] lg:gap-[28px] bg-white/5 rounded-[24px] p-[24px] lg:p-[40px] shadow-[0_4px_24px_#00000020]">
         <span class="font-heading text-[32px] font-bold text-white tracking-[-0.5px]">CodePilot</span>
-        <h2 class="font-heading text-[40px] font-bold text-white leading-[1.2] tracking-[-0.5px] max-w-[420px]">
+        <h2 class="font-heading text-[28px] lg:text-[40px] font-bold text-white leading-[1.2] tracking-[-0.5px] max-w-[420px]">
           Turn your ideas<br/>into reality with AI
         </h2>
-        <p class="font-body text-[16px] text-white/70 leading-[1.7] max-w-[420px]">
+        <p class="font-body text-[14px] lg:text-[16px] text-white/70 leading-[1.7] max-w-[420px]">
           Build production-ready web applications<br/>without writing a single line of code.
         </p>
         <div class="flex flex-col gap-[8px] w-full bg-white/8 rounded-[12px] p-[16px]">
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="relative flex gap-[16px] w-full">
+      <div class="relative hidden lg:flex gap-[16px] w-full">
         <div v-for="stat in stats" :key="stat.label" class="flex items-center justify-center gap-[12px] flex-1 bg-white/7 rounded-[16px] p-[16px_20px] shadow-[0_2px_12px_#00000015]">
           <span class="font-heading text-[28px] font-bold text-white">{{ stat.value }}</span>
           <span class="font-body text-[13px] text-white/60">{{ stat.label }}</span>
@@ -48,7 +48,7 @@
     </div>
 
     <!-- Login Form -->
-    <div class="relative flex items-center justify-center flex-1 h-full p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
+    <div class="relative flex items-center justify-center flex-1 p-[32px_24px] lg:p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
       <div class="absolute pointer-events-none w-[300px] h-[300px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:100px;right:20px"></div>
       <div class="absolute pointer-events-none w-[250px] h-[250px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-40px"></div>
       <div class="absolute pointer-events-none w-[60px] h-[60px] rounded-[14px] bg-[#FF5C0006] rotate-[20deg]" style="top:450px;right:50px"></div>
@@ -58,8 +58,8 @@
 
       <div class="flex flex-col gap-[28px] w-full max-w-[480px]">
         <div>
-          <h1 class="font-heading text-[36px] font-bold text-[var(--foreground-primary)] tracking-[-0.5px]">Welcome back</h1>
-          <p class="font-body text-[16px] text-[var(--foreground-secondary)] mt-[4px]">Log in to your account to continue building</p>
+          <h1 class="font-heading text-[28px] lg:text-[36px] font-bold text-[var(--foreground-primary)] tracking-[-0.5px]">Welcome back</h1>
+          <p class="font-body text-[14px] lg:text-[16px] text-[var(--foreground-secondary)] mt-[4px]">Log in to your account to continue building</p>
         </div>
 
         <form @submit.prevent="handleLogin" class="flex flex-col gap-[24px] w-full">

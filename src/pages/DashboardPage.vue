@@ -3,8 +3,8 @@
     <AppSidebar :navItems="navItems" />
 
     <div class="flex flex-col flex-1 h-full">
-      <div class="flex items-center justify-between h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
-        <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">My Projects</h1>
+      <div class="flex items-center justify-between h-[64px] px-[16px] lg:px-[32px] bg-white border-b border-[var(--border-subtle)] gap-[12px]">
+        <h1 class="font-heading text-[20px] lg:text-[24px] font-bold text-[var(--foreground-primary)]">My Projects</h1>
         <div class="flex items-center gap-[12px]">
           <div class="flex items-center gap-[8px] h-[36px] px-[12px] rounded-[8px] border border-[var(--border-subtle)] w-[220px]">
             <Search :size="16" class="text-[var(--foreground-muted)]" />
@@ -17,10 +17,10 @@
         </div>
       </div>
 
-      <div class="flex-1 overflow-auto p-[40px]">
+      <div class="flex-1 overflow-auto p-[20px] lg:p-[40px]">
         <div class="flex flex-col gap-[20px] w-full">
           <!-- Row 1 -->
-          <div class="flex gap-[20px] w-full">
+          <div class="flex flex-col md:flex-row gap-[16px] lg:gap-[20px] w-full">
             <div
               v-for="project in row1"
               :key="project.id"
@@ -42,7 +42,7 @@
           </div>
 
           <!-- Row 2 -->
-          <div class="flex gap-[20px] w-full">
+          <div class="flex flex-col md:flex-row gap-[16px] lg:gap-[20px] w-full">
             <div
               v-for="project in row2"
               :key="project.id"

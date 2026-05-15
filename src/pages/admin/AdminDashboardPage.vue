@@ -3,8 +3,8 @@
     <AdminSidebar :navItems="navItems" />
 
     <div class="flex flex-col flex-1 h-full">
-      <div class="flex items-center justify-between h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
-        <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">Overview</h1>
+      <div class="flex items-center justify-between h-[64px] px-[16px] lg:px-[32px] bg-white border-b border-[var(--border-subtle)] gap-[12px] flex-wrap">
+        <h1 class="font-heading text-[20px] lg:text-[24px] font-bold text-[var(--foreground-primary)]">Overview</h1>
         <div class="flex items-center gap-[12px]">
           <button class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
             <Calendar :size="16" />
@@ -17,10 +17,10 @@
         </div>
       </div>
 
-      <div class="flex-1 overflow-auto p-[32px]">
-        <div class="flex flex-col gap-[24px] w-full">
+      <div class="flex-1 overflow-auto p-[20px] lg:p-[32px]">
+        <div class="flex flex-col gap-[20px] lg:gap-[24px] w-full">
           <!-- Stats Row -->
-          <div class="flex gap-[20px] w-full">
+          <div class="flex flex-col md:flex-row gap-[16px] lg:gap-[20px] w-full">
             <div v-for="stat in stats" :key="stat.label" class="flex flex-col gap-[8px] flex-1 bg-white rounded-[12px] border border-[var(--border-subtle)] p-[20px_24px]">
               <div class="flex items-center justify-between">
                 <span class="font-caption text-[12px] text-[var(--foreground-muted)] uppercase tracking-wide">{{ stat.label }}</span>
@@ -35,7 +35,7 @@
           </div>
 
           <!-- Charts Row -->
-          <div class="flex gap-[20px] w-full flex-1">
+          <div class="flex flex-col md:flex-row gap-[16px] lg:gap-[20px] w-full flex-1">
             <div class="flex flex-col gap-[16px] flex-1 bg-white rounded-[12px] border border-[var(--border-subtle)] p-[20px_24px]">
               <div class="flex items-center justify-between">
                 <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">User Growth</h3>

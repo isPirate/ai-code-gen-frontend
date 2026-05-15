@@ -3,8 +3,8 @@
     <AdminSidebar :navItems="navItems" />
 
     <div class="flex flex-col flex-1 h-full">
-      <div class="flex items-center justify-between h-[64px] px-[32px] bg-white border-b border-[var(--border-subtle)]">
-        <h1 class="font-heading text-[24px] font-bold text-[var(--foreground-primary)]">User Management</h1>
+      <div class="flex items-center justify-between h-[64px] px-[16px] lg:px-[32px] bg-white border-b border-[var(--border-subtle)] gap-[12px] flex-wrap">
+        <h1 class="font-heading text-[20px] lg:text-[24px] font-bold text-[var(--foreground-primary)]">User Management</h1>
         <div class="flex items-center gap-[12px]">
           <div class="flex items-center gap-[8px] h-[36px] px-[12px] rounded-[8px] border border-[#E5E7EB] w-[240px]">
             <Search :size="14" class="text-[var(--foreground-muted)]" />
@@ -21,8 +21,8 @@
         </div>
       </div>
 
-      <div class="flex-1 overflow-auto p-[32px]">
-        <div class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden h-full">
+      <div class="flex-1 overflow-auto p-[20px] lg:p-[32px]">
+        <div class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden overflow-x-auto h-full">
           <!-- Table Header -->
           <div class="flex items-center h-[48px] px-[20px]" style="background:#F0F1F3">
             <div class="w-[200px] font-body text-[13px] font-bold text-[#4A4A4A]">User</div>
