@@ -138,13 +138,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
 
 const router = useRouter()
 const auth = useAuth()
+
+onMounted(() => {
+  if (auth.isAuthenticated.value) {
+    router.replace(auth.isAdmin.value ? '/admin' : '/dashboard')
+  }
+})
 
 const userAccount = ref('')
 const password = ref('')

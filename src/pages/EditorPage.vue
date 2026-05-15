@@ -8,17 +8,32 @@
           Back
         </button>
         <div class="w-[1px] h-[24px] bg-[var(--border-subtle)]"></div>
-        <span class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">{{ projectName }}</span>
-        <span class="px-[6px] py-[2px] rounded-[6px] bg-[#FFF5EE] font-caption text-[10px] text-[var(--accent-primary)]">Draft</span>
+        <span class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">{{ app?.appName || 'New Project' }}</span>
+        <span class="px-[6px] py-[2px] rounded-[6px] font-caption text-[10px]"
+          :class="app?.deployKey || deployUrl ? 'bg-green-50 text-green-700' : 'bg-[#FFF5EE] text-[var(--accent-primary)]'">
+          {{ app?.deployKey || deployUrl ? 'Deployed' : 'Draft' }}
+        </span>
+        <template v-if="deployUrl">
+          <div class="w-[1px] h-[24px] bg-[var(--border-subtle)]"></div>
+          <a :href="deployUrl" target="_blank" class="flex items-center gap-[4px] font-body text-[12px] text-[var(--accent-primary)] hover:underline">
+            <ExternalLink :size="14" />
+            {{ deployUrl }}
+          </a>
+        </template>
       </div>
       <div class="flex items-center gap-[8px]">
         <button class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
           <Download :size="16" />
           Export
         </button>
-        <button class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[13px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
+        <button
+          v-if="appId"
+          @click="handleDeploy"
+          :disabled="deploying"
+          class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[13px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60"
+        >
           <Rocket :size="16" />
-          Deploy
+          {{ deploying ? 'Deploying...' : 'Deploy' }}
         </button>
       </div>
     </div>
@@ -26,38 +41,62 @@
     <!-- Body -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Chat Panel -->
-      <div class="flex flex-col w-[360px] bg-white border-r border-[var(--border-subtle)]">
+      <div class="flex flex-col w-[360px] bg-white border-r border-[var(--border-subtle)] relative">
         <div class="flex items-center h-[48px] px-[16px] border-b border-[var(--border-subtle)] gap-[8px]">
           <Sparkles :size="18" class="text-[var(--accent-primary)]" />
           <span class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">AI Assistant</span>
         </div>
 
-        <div class="flex-1 overflow-auto p-[16px] flex flex-col gap-[16px]">
-          <div v-for="(msg, i) in messages" :key="i" :class="['flex gap-[8px]', msg.role === 'user' ? 'justify-end' : '']">
-            <div v-if="msg.role === 'ai'" class="w-[28px] h-[28px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-              <Sparkles :size="14" class="text-white" />
-            </div>
-            <div
-              :class="[
-                'rounded-[12px] p-[10px_14px] font-body text-[13px] leading-relaxed max-w-[260px]',
-                msg.role === 'user'
-                  ? 'bg-[var(--accent-primary)] text-white rounded-tr-[4px]'
-                  : 'bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px]'
-              ]"
-            >
-              {{ msg.text }}
-            </div>
+        <div ref="chatContainer" @scroll="onChatScroll" class="flex-1 overflow-auto p-[16px] flex flex-col gap-[16px]">
+          <div v-if="loadingApp" class="flex items-center justify-center h-full">
+            <span class="font-body text-[13px] text-[var(--foreground-muted)]">Loading app...</span>
           </div>
+
+          <template v-else>
+            <div v-for="(msg, i) in messages" :key="i" :class="['flex gap-[8px]', msg.role === 'user' ? 'justify-end' : '']">
+              <div v-if="msg.role === 'ai'" class="w-[28px] h-[28px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+                <Sparkles :size="14" class="text-white" />
+              </div>
+              <div
+                :class="[
+                  'rounded-[12px] p-[10px_14px] font-body text-[13px] leading-relaxed max-w-[260px] whitespace-pre-wrap',
+                  msg.role === 'user'
+                    ? 'bg-[var(--accent-primary)] text-white rounded-tr-[4px]'
+                    : 'bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px]'
+                ]"
+              >
+                {{ msg.text }}
+              </div>
+            </div>
+
+            <div v-if="streaming" class="flex items-center gap-[4px] px-[8px]">
+              <span class="w-[6px] h-[6px] rounded-full bg-[var(--accent-primary)] animate-bounce"></span>
+              <span class="w-[6px] h-[6px] rounded-full bg-[var(--accent-primary)] animate-bounce" style="animation-delay: 0.1s"></span>
+              <span class="w-[6px] h-[6px] rounded-full bg-[var(--accent-primary)] animate-bounce" style="animation-delay: 0.2s"></span>
+            </div>
+          </template>
+        </div>
+
+        <!-- Scroll-to-bottom button -->
+        <div v-if="!nearBottom" class="absolute bottom-[60px] left-1/2 -translate-x-1/2 z-10">
+          <button @click="scrollToBottom(); nearBottom = true" class="w-[36px] h-[36px] rounded-full bg-white border border-[var(--border-subtle)] shadow-md flex items-center justify-center hover:bg-[var(--surface-secondary)] transition-all">
+            <ChevronDown :size="18" class="text-[var(--foreground-secondary)]" />
+          </button>
         </div>
 
         <div class="flex items-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)]">
           <input
             v-model="chatInput"
             @keydown.enter="sendMessage"
+            :disabled="streaming"
             placeholder="Describe changes..."
-            class="flex-1 font-body text-[13px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent"
+            class="flex-1 font-body text-[13px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent disabled:opacity-40"
           />
-          <button @click="sendMessage" class="w-[32px] h-[32px] rounded-[8px] bg-[var(--accent-primary)] flex items-center justify-center hover:bg-[var(--accent-hover)] transition-colors">
+          <button
+            @click="sendMessage"
+            :disabled="streaming || !chatInput.trim()"
+            class="w-[32px] h-[32px] rounded-[8px] bg-[var(--accent-primary)] flex items-center justify-center hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40"
+          >
             <ArrowUp :size="16" class="text-white" />
           </button>
         </div>
@@ -72,38 +111,74 @@
             <span class="w-[10px] h-[10px] rounded-full bg-[#28CA41]"></span>
           </div>
           <div class="flex items-center gap-[8px]">
-            <button v-for="tab in tabs" :key="tab.value" @click="activeTab = tab.value"
-              :class="['px-[10px] py-[4px] rounded-[6px] font-body text-[12px] transition-colors',
-                activeTab === tab.value
-                  ? 'bg-[var(--surface-secondary)] text-[var(--foreground-primary)] font-medium'
-                  : 'text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]']">
-              {{ tab.label }}
-            </button>
+            <span class="px-[10px] py-[4px] rounded-[6px] bg-[var(--surface-secondary)] font-body text-[12px] font-medium text-[var(--foreground-primary)]">Preview</span>
           </div>
         </div>
 
-        <div class="flex-1 overflow-auto p-[24px] flex items-center justify-center">
-          <div class="w-full max-w-[700px] bg-white rounded-[12px] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
-            <div class="flex h-[44px] border-b border-[var(--border-subtle)]">
-              <div class="flex items-center gap-[8px] px-[16px] border-b-[2px] border-[var(--accent-primary)]">
-                <span class="font-body text-[13px] font-medium text-[var(--accent-primary)]">Overview</span>
-              </div>
-              <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Analytics</span></div>
-              <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Reports</span></div>
+        <div class="flex-1 overflow-auto">
+          <div v-if="loadingApp" class="flex items-center justify-center h-full">
+            <span class="font-body text-[14px] text-[var(--foreground-muted)]">Loading app...</span>
+          </div>
+
+          <div v-else-if="loadError" class="flex items-center justify-center h-full">
+            <div class="text-center">
+              <span class="font-body text-[14px] text-red-500">{{ loadError }}</span>
             </div>
-            <div class="p-[20px] grid grid-cols-4 gap-[16px]">
-              <div v-for="i in 4" :key="i" class="bg-[var(--surface-secondary)] rounded-[8px] p-[14px]">
-                <div class="w-full h-[8px] rounded-full bg-[#E5E7EB] mb-[8px]"></div>
-                <div class="w-2/3 h-[12px] rounded-full bg-[#D1D5DB] mb-[4px]"></div>
-                <div class="w-1/3 h-[8px] rounded-full bg-[#E5E7EB]"></div>
-              </div>
+          </div>
+
+          <iframe
+            v-else-if="previewUrl"
+            :src="previewUrl"
+            class="w-full h-full border-0"
+          ></iframe>
+
+          <div v-else-if="streaming" class="flex items-center justify-center h-full">
+            <div class="text-center">
+              <Sparkles :size="24" class="text-[var(--accent-primary)] mx-auto mb-[12px] animate-pulse" />
+              <span class="font-body text-[14px] text-[var(--foreground-muted)]">Generating preview...</span>
             </div>
-            <div class="px-[20px] pb-[20px]">
-              <div class="w-full h-[160px] rounded-[8px] bg-[var(--surface-secondary)] flex items-center justify-center">
-                <span class="font-body text-[13px] text-[var(--foreground-muted)]">Chart preview area</span>
+          </div>
+
+          <div v-else class="flex items-center justify-center h-full p-[24px]">
+            <div class="w-full max-w-[700px] bg-white rounded-[12px] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+              <div class="flex h-[44px] border-b border-[var(--border-subtle)]">
+                <div class="flex items-center gap-[8px] px-[16px] border-b-[2px] border-[var(--accent-primary)]">
+                  <span class="font-body text-[13px] font-medium text-[var(--accent-primary)]">Overview</span>
+                </div>
+                <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Analytics</span></div>
+                <div class="flex items-center gap-[8px] px-[16px]"><span class="font-body text-[13px] text-[var(--foreground-muted)]">Reports</span></div>
+              </div>
+              <div class="p-[20px] grid grid-cols-4 gap-[16px]">
+                <div v-for="i in 4" :key="i" class="bg-[var(--surface-secondary)] rounded-[8px] p-[14px]">
+                  <div class="w-full h-[8px] rounded-full bg-[#E5E7EB] mb-[8px]"></div>
+                  <div class="w-2/3 h-[12px] rounded-full bg-[#D1D5DB] mb-[4px]"></div>
+                  <div class="w-1/3 h-[8px] rounded-full bg-[#E5E7EB]"></div>
+                </div>
+              </div>
+              <div class="px-[20px] pb-[20px]">
+                <div class="w-full h-[160px] rounded-[8px] bg-[var(--surface-secondary)] flex items-center justify-center">
+                  <span class="font-body text-[13px] text-[var(--foreground-muted)]">Chat with AI to generate your app</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deploy Result Modal -->
+    <div v-if="showDeployResult" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="showDeployResult = false">
+      <div class="bg-white rounded-[16px] p-[32px] w-[480px] shadow-xl">
+        <div class="flex items-center gap-[12px] mb-[16px]">
+          <div class="w-[40px] h-[40px] rounded-full bg-green-50 flex items-center justify-center">
+            <Rocket :size="20" class="text-green-600" />
+          </div>
+          <h3 class="font-heading text-[22px] font-bold text-[var(--foreground-primary)]">Deployed!</h3>
+        </div>
+        <p class="font-body text-[14px] text-[var(--foreground-secondary)] mb-[16px]">Your app is now live at:</p>
+        <a :href="deployUrl" target="_blank" class="block font-body text-[14px] text-[var(--accent-primary)] underline break-all mb-[24px]">{{ deployUrl }}</a>
+        <div class="flex justify-end gap-[12px]">
+          <button @click="showDeployResult = false" class="px-[20px] py-[10px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">Close</button>
         </div>
       </div>
     </div>
@@ -111,42 +186,158 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { ArrowLeft, Download, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import { ref, onMounted, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft, ChevronDown, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import { api } from '../api/client'
 
 const route = useRoute()
+const router = useRouter()
 
-const projectName = ref(route.query.name || 'Untitled Project')
+const appId = ref(route.query.appId || null)
+const app = ref(null)
+const loadingApp = ref(false)
+const loadError = ref('')
 const chatInput = ref('')
-const activeTab = ref('preview')
+const chatContainer = ref(null)
+const messages = ref([])
+const streaming = ref(false)
+const previewUrl = ref('')
+const deploying = ref(false)
+const deployUrl = ref('')
+const showDeployResult = ref(false)
 
-const tabs = [
-  { label: 'Preview', value: 'preview' },
-  { label: 'Code', value: 'code' },
-  { label: 'Files', value: 'files' },
-]
+// Smart scroll: only auto-scroll when user is near the bottom
+const nearBottom = ref(true)
 
-// If coming from landing page with a prompt, show it
-const initialPrompt = route.query.prompt || ''
-
-const messages = ref([
-  { role: 'ai', text: "Hi! I'm your AI assistant. Describe the app you want to build, and I'll generate it for you." },
-])
-
-if (initialPrompt) {
-  messages.value.push({ role: 'user', text: initialPrompt })
-  messages.value.push({ role: 'ai', text: "Here's what I've built based on your description! You can preview it on the right, or describe changes to refine it." })
+function isNearBottom() {
+  const el = chatContainer.value
+  if (!el) return true
+  return el.scrollTop + el.clientHeight >= el.scrollHeight - 50
 }
 
-function sendMessage() {
-  const text = chatInput.value.trim()
-  if (!text) return
-  messages.value.push({ role: 'user', text })
+function onChatScroll() {
+  nearBottom.value = isNearBottom()
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+}
+
+onMounted(async () => {
+  if (!appId.value) {
+    messages.value = [
+      { role: 'ai', text: "Hi! I'm your AI assistant. Describe the app you want to build, and I'll generate it for you." },
+    ]
+    return
+  }
+
+  loadingApp.value = true
+  try {
+    const result = await api.getAppVOById(appId.value)
+    app.value = result
+    appId.value = result.id
+
+    if (result.codeGenType) {
+      previewUrl.value = `/api/static/${result.codeGenType}_${result.id}/`
+    }
+
+    // Restore deploy URL from stored state if app is already deployed
+    if (result.deployKey) {
+      const stored = sessionStorage.getItem(`deploy_url_${result.id}`)
+      if (stored) {
+        deployUrl.value = stored
+      }
+    }
+
+    loadingApp.value = false
+
+    if (result.initPrompt && !result.codeGenType) {
+      await sendMessage(result.initPrompt)
+    } else {
+      messages.value = [
+        { role: 'ai', text: "Hi! I'm your AI assistant. Describe the app you want to build, and I'll generate it for you." },
+      ]
+    }
+  } catch (e) {
+    loadError.value = e.message || 'Failed to load app'
+    loadingApp.value = false
+  }
+})
+
+async function sendMessage(text) {
+  if (text && typeof text !== 'string') text = undefined
+  const msg = (text || chatInput.value.trim())
+  if (!msg || streaming.value) return
+
   chatInput.value = ''
 
-  setTimeout(() => {
-    messages.value.push({ role: 'ai', text: "I've updated the preview based on your request. Check the right panel to see the changes!" })
-  }, 800)
+  if (!appId.value) {
+    loadingApp.value = true
+    try {
+      const id = await api.addApp({ initPrompt: msg })
+      appId.value = id
+      router.replace({ query: { appId: id } })
+    } catch (e) {
+      loadError.value = 'Failed to create app: ' + (e.message || '')
+      loadingApp.value = false
+      return
+    }
+    loadingApp.value = false
+  }
+
+  messages.value = [...messages.value, { role: 'user', text: msg }]
+
+  streaming.value = true
+  nearBottom.value = true
+  const aiMsg = { role: 'ai', text: '' }
+  messages.value = [...messages.value, aiMsg]
+  scrollToBottom()
+
+  await api.sseChatToGenCode(
+    appId.value,
+    msg,
+    (chunk) => {
+      aiMsg.text += chunk
+      messages.value = [...messages.value]
+      if (nearBottom.value) scrollToBottom()
+    },
+    async () => {
+      streaming.value = false
+      try {
+        const updated = await api.getAppVOById(appId.value)
+        app.value = updated
+        if (updated.codeGenType) {
+          previewUrl.value = `/api/static/${updated.codeGenType}_${updated.id}/`
+        }
+      } catch {}
+    },
+    (err) => {
+      aiMsg.text = 'Error: ' + (err.message || 'Unknown error')
+      streaming.value = false
+      messages.value = [...messages.value]
+    }
+  )
+}
+
+async function handleDeploy() {
+  if (!appId.value || deploying.value) return
+  deploying.value = true
+  try {
+    const url = await api.deployApp({ appId: appId.value })
+    deployUrl.value = url
+    showDeployResult.value = true
+    sessionStorage.setItem(`deploy_url_${appId.value}`, url)
+    const updated = await api.getAppVOById(appId.value)
+    app.value = updated
+  } catch (e) {
+    console.error('Deploy failed:', e)
+  } finally {
+    deploying.value = false
+  }
 }
 </script>

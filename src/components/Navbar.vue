@@ -10,7 +10,12 @@
       <a href="#pricing" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Pricing</a>
       <a href="#docs" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Docs</a>
     </div>
-    <div class="flex items-center gap-[12px]">
+    <div v-if="auth.isAuthenticated.value" class="flex items-center gap-[12px]">
+      <router-link to="/dashboard" class="flex items-center px-[20px] py-[8px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
+        Dashboard
+      </router-link>
+    </div>
+    <div v-else class="flex items-center gap-[12px]">
       <router-link to="/login" class="flex items-center px-[20px] py-[8px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors">
         Log in
       </router-link>
@@ -23,4 +28,7 @@
 
 <script setup>
 import { Sparkles } from 'lucide-vue-next'
+import { useAuth } from '../stores/auth'
+
+const auth = useAuth()
 </script>

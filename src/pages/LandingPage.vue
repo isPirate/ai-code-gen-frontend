@@ -177,6 +177,7 @@ import Navbar from '../components/Navbar.vue'
 import AppFooter from '../components/AppFooter.vue'
 import { Sparkles, Paperclip, Code, ArrowRight, ArrowUp } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
+import { api } from '../api/client'
 
 const router = useRouter()
 const auth = useAuth()
@@ -189,11 +190,18 @@ const steps = [
   { title: 'Deploy & share', desc: 'One-click deploy to production. Export full code anytime you want.' },
 ]
 
-function handleGenerate() {
-  if (auth.isAuthenticated.value) {
-    router.push({ path: '/editor', query: { prompt: prompt.value } })
-  } else {
+async function handleGenerate() {
+  if (!auth.isAuthenticated.value) {
     showLoginPrompt.value = true
+    return
+  }
+  if (!prompt.value.trim()) return
+
+  try {
+    const appId = await api.addApp({ initPrompt: prompt.value })
+    router.push({ path: '/editor', query: { appId } })
+  } catch (e) {
+    console.error('Failed to create app:', e)
   }
 }
 </script>
