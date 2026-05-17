@@ -31,15 +31,14 @@
                 Stack
               </button>
             </div>
-            <button @click="handleGenerate" class="flex items-center gap-[8px] px-[20px] py-[10px] rounded-[12px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
-              <span>Generate</span>
+            <button @click="handleGenerate" :disabled="generating || !prompt.trim()" class="flex items-center gap-[8px] px-[20px] py-[10px] rounded-[12px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60">
+              <span>{{ generating ? 'Generating...' : 'Generate' }}</span>
               <ArrowRight :size="18" />
             </button>
           </div>
+          <p v-if="genError" class="font-body text-[13px] text-red-500 mt-[8px]">{{ genError }}</p>
         </div>
       </div>
-
-      <!-- Login Prompt Modal -->
       <div v-if="showLoginPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="showLoginPrompt = false">
         <div class="bg-white rounded-[16px] p-[32px] w-[420px] shadow-xl text-center">
           <Sparkles :size="40" class="text-[var(--accent-primary)] mx-auto mb-[16px]" />
@@ -183,6 +182,8 @@ const router = useRouter()
 const auth = useAuth()
 const prompt = ref('')
 const showLoginPrompt = ref(false)
+const generating = ref(false)
+const genError = ref('')
 
 const steps = [
   { title: 'Describe your idea', desc: 'Tell the AI what you want to build using natural language. No coding required.' },
@@ -195,13 +196,17 @@ async function handleGenerate() {
     showLoginPrompt.value = true
     return
   }
-  if (!prompt.value.trim()) return
+  if (!prompt.value.trim() || generating.value) return
 
+  generating.value = true
+  genError.value = ''
   try {
     const appId = await api.addApp({ initPrompt: prompt.value })
     router.push({ path: '/editor', query: { appId } })
   } catch (e) {
-    console.error('Failed to create app:', e)
+    genError.value = e.message || '创建应用失败，请重试'
+  } finally {
+    generating.value = false
   }
 }
 </script>

@@ -204,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminSidebar from '../../components/AdminSidebar.vue'
 import { LayoutDashboard, Users, Folder, Settings, Search, User, Tag, X, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool, Eye, Pencil, Star, Image, Trash2 } from 'lucide-vue-next'
@@ -389,4 +389,8 @@ async function confirmDelete() {
 }
 
 onMounted(fetchProjects)
+
+onUnmounted(() => {
+  clearTimeout(searchTimer.value)
+})
 </script>

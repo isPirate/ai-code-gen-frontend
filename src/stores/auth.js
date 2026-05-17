@@ -20,10 +20,14 @@ async function login(userAccount, userPassword) {
 
 async function register(userAccount, userPassword, checkPassword) {
   await api.register(userAccount, userPassword, checkPassword)
-  const u = await api.login(userAccount, userPassword)
-  user.value = u
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(u))
-  return u
+  try {
+    const u = await api.login(userAccount, userPassword)
+    user.value = u
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(u))
+    return u
+  } catch {
+    throw new Error('注册成功但自动登录失败，请手动登录')
+  }
 }
 
 async function logout() {

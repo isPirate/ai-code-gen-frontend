@@ -136,6 +136,10 @@
             <input v-model="addForm.userAccount" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" placeholder="Login account name" required />
           </div>
           <div class="flex flex-col gap-[6px]">
+            <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Password <span class="text-red-400">*</span></label>
+            <input v-model="addForm.userPassword" type="password" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" placeholder="Login password" required />
+          </div>
+          <div class="flex flex-col gap-[6px]">
             <label class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Display Name <span class="text-red-400">*</span></label>
             <input v-model="addForm.userName" class="h-[44px] px-[14px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-colors" placeholder="Display name" required />
           </div>
@@ -208,7 +212,7 @@ const totalPage = ref(0)
 const showAddModal = ref(false)
 const adding = ref(false)
 const addError = ref('')
-const addForm = ref({ userName: '', userAccount: '', userRole: 'user', userProfile: '' })
+const addForm = ref({ userName: '', userAccount: '', userPassword: '', userRole: 'user', userProfile: '' })
 
 // Delete User
 const deleteTarget = ref(null)
@@ -282,8 +286,8 @@ async function handleDeleteUser() {
 
 async function handleAddUser() {
   addError.value = ''
-  if (!addForm.value.userName || !addForm.value.userAccount) {
-    addError.value = 'Name and Account are required'
+  if (!addForm.value.userName || !addForm.value.userAccount || !addForm.value.userPassword) {
+    addError.value = 'Name, Account and Password are required'
     return
   }
   adding.value = true
@@ -291,11 +295,12 @@ async function handleAddUser() {
     await api.addUser({
       userName: addForm.value.userName,
       userAccount: addForm.value.userAccount,
+      userPassword: addForm.value.userPassword,
       userRole: addForm.value.userRole,
       userProfile: addForm.value.userProfile || '',
       userAvatar: '',
     })
-    addForm.value = { userName: '', userAccount: '', userRole: 'user', userProfile: '' }
+    addForm.value = { userName: '', userAccount: '', userPassword: '', userRole: 'user', userProfile: '' }
     showAddModal.value = false
     fetchUsers()
   } catch (e) {

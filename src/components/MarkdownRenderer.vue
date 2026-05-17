@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -64,6 +64,8 @@ watch(() => props.content, () => {
   })
 }, { immediate: true })
 
+const copyTimers = new Set()
+
 function onClick(e) {
   const btn = e.target.closest('.copy-code-btn')
   if (!btn) return
@@ -71,15 +73,24 @@ function onClick(e) {
   navigator.clipboard.writeText(code).then(() => {
     btn.textContent = 'Copied!'
     btn.classList.add('copied')
-    setTimeout(() => {
+    const t = setTimeout(() => {
       btn.textContent = 'Copy'
       btn.classList.remove('copied')
+      copyTimers.delete(t)
     }, 2000)
+    copyTimers.add(t)
   }).catch(() => {
     btn.textContent = 'Failed'
-    setTimeout(() => { btn.textContent = 'Copy' }, 2000)
+    const t = setTimeout(() => { btn.textContent = 'Copy'; copyTimers.delete(t) }, 2000)
+    copyTimers.add(t)
   })
 }
+
+onBeforeUnmount(() => {
+  copyTimers.forEach(t => clearTimeout(t))
+  copyTimers.clear()
+  if (renderRAF) cancelAnimationFrame(renderRAF)
+})
 </script>
 
 <style>
