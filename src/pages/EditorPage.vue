@@ -53,21 +53,32 @@
           </div>
 
           <template v-else>
-            <div v-for="(msg, i) in messages" :key="i" :class="['flex gap-[8px]', msg.role === 'user' ? 'justify-end' : '']">
+            <div v-for="(msg, i) in messages" :key="i" :class="['flex gap-[8px] group', msg.role === 'user' ? 'justify-end' : '']">
               <div v-if="msg.role === 'ai'" class="w-[28px] h-[28px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
                 <Sparkles :size="14" class="text-white" />
               </div>
               <div
                 v-if="msg.role === 'user'"
-                class="rounded-[12px] p-[10px_14px] bg-[var(--accent-primary)] text-white rounded-tr-[4px] font-body text-[13px] leading-relaxed max-w-[260px] whitespace-pre-wrap"
+                class="relative rounded-[12px] p-[10px_14px] bg-[var(--accent-primary)] text-white rounded-tr-[4px] font-body text-[13px] leading-relaxed max-w-[260px] whitespace-pre-wrap"
               >
                 {{ msg.text }}
+                <button @click="copyMsg(i)" class="absolute bottom-[2px] right-[4px] w-[22px] h-[22px] rounded-[4px] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" title="Copy">
+                  <Check v-if="copiedIdx === i" :size="12" class="text-green-300" />
+                  <Copy v-else :size="12" />
+                </button>
               </div>
               <div
                 v-else
-                class="rounded-[12px] p-[14px_18px] bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px] flex-1 min-w-0"
+                class="relative rounded-[12px] p-[14px_18px] bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px] flex-1 min-w-0"
               >
                 <MarkdownRenderer :content="msg.text" />
+                <div class="absolute top-[6px] right-[8px] flex items-center gap-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span v-if="copiedIdx === i" class="font-caption text-[11px] text-green-600">Copied!</span>
+                  <button @click="copyMsg(i)" class="w-[26px] h-[26px] rounded-[4px] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[#00000008]" title="Copy">
+                    <Check v-if="copiedIdx === i" :size="13" class="text-green-500" />
+                    <Copy v-else :size="13" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -200,7 +211,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, ChevronDown, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
 
@@ -217,6 +228,18 @@ const messages = ref([])
 const streaming = ref(false)
 const previewUrl = ref('')
 const deploying = ref(false)
+
+const copiedIdx = ref(-1)
+let copyTimer = null
+
+function copyMsg(i) {
+  const msg = messages.value[i]
+  if (!msg) return
+  navigator.clipboard.writeText(msg.text)
+  copiedIdx.value = i
+  clearTimeout(copyTimer)
+  copyTimer = setTimeout(() => { copiedIdx.value = -1 }, 2000)
+}
 const deployUrl = ref('')
 const showDeployResult = ref(false)
 
@@ -269,6 +292,7 @@ function onResizeEnd() {
 }
 
 onUnmounted(() => {
+  clearTimeout(copyTimer)
   document.body.style.userSelect = ''
   document.body.style.cursor = ''
   document.removeEventListener('mousemove', onResizeMove)

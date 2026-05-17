@@ -1,9 +1,9 @@
 <template>
-  <div class="markdown-body" v-html="rendered"></div>
+  <div ref="container" class="markdown-body" v-html="rendered" @click="onClick"></div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -23,13 +23,31 @@ const props = defineProps({
   content: { type: String, default: '' },
 })
 
-marked.setOptions({
-  breaks: true,
-})
+const container = ref(null)
+
+marked.setOptions({ breaks: true })
+
+function escapeAttr(s) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+function decodeHtml(s) {
+  return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+}
+
+function wrapCodeBlocks(html) {
+  return html.replace(/<pre><code(\s+class="([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g, (_, classAttr, className, code) => {
+    const langMatch = className ? className.match(/language-(\w+)/) : null
+    const lang = langMatch ? langMatch[1] : ''
+    const rawCode = decodeHtml(code)
+    const langLabel = lang ? `<span class="code-lang">${lang}</span>` : ''
+    return `<div class="code-block-wrapper"><div class="code-block-header">${langLabel}<button class="copy-code-btn" data-code="${escapeAttr(rawCode)}">Copy</button></div><pre><code${classAttr || ''}>${code}</code></pre></div>`
+  })
+}
 
 const rendered = computed(() => {
   if (!props.content) return ''
-  return marked.parse(props.content, {
+  const html = marked.parse(props.content, {
     highlight(code, lang) {
       if (lang && hljs.getLanguage(lang)) {
         return hljs.highlight(code, { language: lang }).value
@@ -37,7 +55,25 @@ const rendered = computed(() => {
       return hljs.highlightAuto(code).value
     },
   })
+  return wrapCodeBlocks(html)
 })
+
+function onClick(e) {
+  const btn = e.target.closest('.copy-code-btn')
+  if (!btn) return
+  const code = decodeHtml(btn.dataset.code || '')
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!'
+    btn.classList.add('copied')
+    setTimeout(() => {
+      btn.textContent = 'Copy'
+      btn.classList.remove('copied')
+    }, 2000)
+  }).catch(() => {
+    btn.textContent = 'Failed'
+    setTimeout(() => { btn.textContent = 'Copy' }, 2000)
+  })
+}
 </script>
 
 <style>
@@ -76,12 +112,52 @@ const rendered = computed(() => {
   border-radius: 4px;
   background: var(--surface-secondary);
 }
-.markdown-body pre {
+
+.code-block-wrapper {
   margin: 10px 0;
   border-radius: 8px;
   overflow: hidden;
+  background: #1E1E2E;
 }
-.markdown-body pre code {
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #181825;
+}
+.code-block-header .code-lang {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: #A6ADC8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.copy-code-btn {
+  font-family: inherit;
+  font-size: 11px;
+  color: #A6ADC8;
+  background: transparent;
+  border: 1px solid #45475A;
+  border-radius: 4px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.copy-code-btn:hover {
+  color: #CDD6F4;
+  border-color: #89B4FA;
+}
+.copy-code-btn.copied {
+  color: #A6E3A1;
+  border-color: #A6E3A1;
+}
+
+.code-block-wrapper pre {
+  margin: 0;
+  border-radius: 0;
+}
+.code-block-wrapper pre code {
   display: block;
   padding: 14px 16px;
   overflow-x: auto;
@@ -90,6 +166,7 @@ const rendered = computed(() => {
   font-size: 12px;
   line-height: 1.6;
 }
+
 .markdown-body table {
   width: 100%;
   border-collapse: collapse;
@@ -113,7 +190,7 @@ const rendered = computed(() => {
   margin: 16px 0;
 }
 
-/* highlight.js theme overrides — Catppuccin Mocha inspired */
+/* highlight.js — Catppuccin Mocha */
 .markdown-body .hljs-keyword { color: #CBA6F7; }
 .markdown-body .hljs-string { color: #A6E3A1; }
 .markdown-body .hljs-number { color: #FAB387; }
