@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
 import { MonitorDot, Star, Store, ScrollText, Palette, Search } from 'lucide-vue-next'
@@ -102,7 +102,8 @@ function projectIcon(app) {
 }
 
 function projectGradient(app) {
-  return gradients[(app.id || 0) % gradients.length]
+  const id = typeof app.id === 'number' ? app.id : (String(app.id || '').charCodeAt(0) || 0)
+  return gradients[id % gradients.length]
 }
 
 async function fetchApps() {
@@ -133,4 +134,8 @@ function viewApp(app) {
 }
 
 onMounted(fetchApps)
+
+onUnmounted(() => {
+  clearTimeout(searchTimer.value)
+})
 </script>

@@ -65,6 +65,10 @@ const routes = [
     component: () => import('../pages/admin/AdminSystemSettingsPage.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
+  },
 ]
 
 const router = createRouter({
@@ -78,6 +82,8 @@ router.beforeEach((to, from, next) => {
     next('/login')
   } else if (to.meta.requiresAdmin && !auth.isAdmin.value) {
     next('/dashboard')
+  } else if (auth.isAuthenticated.value && (to.path === '/login' || to.path === '/register')) {
+    next(auth.isAdmin.value ? '/admin' : '/dashboard')
   } else {
     next()
   }

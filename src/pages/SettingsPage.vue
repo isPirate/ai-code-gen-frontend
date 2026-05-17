@@ -69,7 +69,7 @@
           </div>
 
           <div class="flex justify-end gap-[12px] w-full">
-            <button class="px-[20px] py-[10px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">Cancel</button>
+            <button @click="resetForm" class="px-[20px] py-[10px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[14px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">Cancel</button>
             <button @click="saveProfile" :disabled="saving" class="px-[20px] py-[10px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60">
               {{ saving ? 'Saving...' : 'Save Changes' }}
             </button>
@@ -156,10 +156,24 @@ function confirmDelete() {
   showDeleteConfirm.value = true
 }
 
+function resetForm() {
+  form.value = {
+    userName: auth.user.value?.userName || '',
+    userAccount: auth.user.value?.userAccount || '',
+    userProfile: auth.user.value?.userProfile || '',
+  }
+  saveError.value = ''
+}
+
 async function deleteAccount() {
   const userId = auth.user.value?.id
-  if (userId) {
-    try { await api.deleteUser(userId) } catch {}
+  if (!userId) return
+  try {
+    await api.deleteUser(userId)
+  } catch (e) {
+    saveError.value = e.message || '删除账号失败'
+    showDeleteConfirm.value = false
+    return
   }
   await auth.logout()
   router.push('/')

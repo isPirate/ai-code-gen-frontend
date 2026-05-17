@@ -204,7 +204,7 @@
       </div>
     </div>
     <!-- Drag overlay — captures mouse events over iframe -->
-    <div v-if="resizing" class="fixed inset-0 z-[9999] cursor-col-resize" @mousemove="onResizeMove" @mouseup="onResizeEnd"></div>
+    <div v-if="resizing" class="fixed inset-0 z-[9999] cursor-col-resize"></div>
   </div>
 </template>
 
@@ -231,6 +231,7 @@ const deploying = ref(false)
 
 const copiedIdx = ref(-1)
 let copyTimer = null
+let eventSource = null
 
 function copyMsg(i) {
   const msg = messages.value[i]
@@ -293,6 +294,7 @@ function onResizeEnd() {
 
 onUnmounted(() => {
   clearTimeout(copyTimer)
+  if (eventSource) { eventSource.close(); eventSource = null }
   document.body.style.userSelect = ''
   document.body.style.cursor = ''
   document.removeEventListener('mousemove', onResizeMove)
@@ -369,7 +371,7 @@ async function sendMessage(text) {
   messages.value = [...messages.value, aiMsg]
   scrollToBottom()
 
-  await api.sseChatToGenCode(
+  eventSource = await api.sseChatToGenCode(
     appId.value,
     msg,
     (chunk) => {

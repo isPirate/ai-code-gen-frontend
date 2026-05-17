@@ -171,9 +171,9 @@ async function handleLogin() {
   try {
     const user = await auth.login(userAccount.value, password.value)
     if (user.userRole === 'admin') {
-      router.push('/admin')
+      router.replace('/admin')
     } else {
-      router.push('/dashboard')
+      router.replace('/dashboard')
     }
   } catch (e) {
     error.value = e.message

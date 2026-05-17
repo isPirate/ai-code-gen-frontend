@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
 import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2 } from 'lucide-vue-next'
@@ -162,7 +162,8 @@ function projectIcon(project) {
 }
 
 function projectGradient(project) {
-  return gradients[(project.id || 0) % gradients.length]
+  const id = typeof project.id === 'number' ? project.id : (String(project.id || '').charCodeAt(0) || 0)
+  return gradients[id % gradients.length]
 }
 
 function formatTime(t) {
@@ -243,4 +244,8 @@ async function confirmDelete() {
 }
 
 onMounted(fetchProjects)
+
+onUnmounted(() => {
+  clearTimeout(searchTimer.value)
+})
 </script>

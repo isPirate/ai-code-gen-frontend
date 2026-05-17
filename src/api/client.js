@@ -100,10 +100,13 @@ export const api = {
 
     es.onerror = () => {
       if (closed) return
+      closed = true
       es.close()
       if (onError) {
         onError(new Error('SSE connection failed'))
       }
     }
+
+    return es
   },
 }

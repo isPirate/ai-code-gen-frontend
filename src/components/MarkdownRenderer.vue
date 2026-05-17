@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -31,32 +31,38 @@ function escapeAttr(s) {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-function decodeHtml(s) {
-  return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-function wrapCodeBlocks(html) {
-  return html.replace(/<pre><code(\s+class="([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g, (_, classAttr, className, code) => {
-    const langMatch = className ? className.match(/language-(\w+)/) : null
-    const lang = langMatch ? langMatch[1] : ''
-    const rawCode = decodeHtml(code)
-    const langLabel = lang ? `<span class="code-lang">${lang}</span>` : ''
-    return `<div class="code-block-wrapper"><div class="code-block-header">${langLabel}<button class="copy-code-btn" data-code="${escapeAttr(rawCode)}">Copy</button></div><pre><code${classAttr || ''}>${code}</code></pre></div>`
-  })
-}
-
-const rendered = computed(() => {
-  if (!props.content) return ''
-  const html = marked.parse(props.content, {
-    highlight(code, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value
+marked.use({
+  renderer: {
+    code({ text, lang }) {
+      const language = lang || ''
+      let highlighted
+      if (language && hljs.getLanguage(language)) {
+        highlighted = hljs.highlight(text, { language }).value
+      } else if (text) {
+        highlighted = hljs.highlightAuto(text).value
+      } else {
+        highlighted = escapeHtml(text)
       }
-      return hljs.highlightAuto(code).value
-    },
-  })
-  return wrapCodeBlocks(html)
+      const langLabel = language ? `<span class="code-lang">${language}</span>` : ''
+      const classAttr = language ? ` class="language-${language}"` : ''
+      return `<div class="code-block-wrapper"><div class="code-block-header">${langLabel}<button class="copy-code-btn" data-code="${escapeAttr(text)}">Copy</button></div><pre><code${classAttr}>${highlighted}</code></pre></div>`
+    }
+  }
 })
+
+const rendered = ref('')
+let renderRAF = null
+
+watch(() => props.content, () => {
+  if (renderRAF) cancelAnimationFrame(renderRAF)
+  renderRAF = requestAnimationFrame(() => {
+    rendered.value = props.content ? marked.parse(props.content) : ''
+  })
+}, { immediate: true })
 
 function onClick(e) {
   const btn = e.target.closest('.copy-code-btn')

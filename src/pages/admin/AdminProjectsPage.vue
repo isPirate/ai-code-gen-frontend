@@ -117,7 +117,7 @@
           <div class="h-[1px] bg-[var(--border-subtle)] flex-shrink-0"></div>
 
           <!-- Pagination -->
-          <div class="flex items-center justify-between px-[20px] py-[12px] bg-white">
+          <div v-if="totalRow > 0" class="flex items-center justify-between px-[20px] py-[12px] bg-white">
             <div class="flex items-center gap-[16px]">
               <span class="font-body text-[12px] text-[var(--foreground-muted)]">
                 Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalRow) }} of {{ totalRow }} projects
@@ -375,6 +375,10 @@ async function confirmDelete() {
   deleting.value = true
   try {
     await api.deleteAppByAdmin(deleteTarget.value.id)
+    // If last item on page was deleted, go back one page
+    if (projects.value.length <= 1 && currentPage.value > 1) {
+      currentPage.value--
+    }
     deleteTarget.value = null
     await fetchProjects()
   } catch (e) {

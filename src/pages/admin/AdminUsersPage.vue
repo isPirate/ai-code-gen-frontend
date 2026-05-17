@@ -78,7 +78,7 @@
           <div class="h-[1px] bg-[var(--border-subtle)] flex-shrink-0"></div>
 
           <!-- Pagination -->
-          <div class="flex items-center justify-between px-[20px] py-[12px] bg-white">
+          <div v-if="totalRow > 0" class="flex items-center justify-between px-[20px] py-[12px] bg-white">
             <div class="flex items-center gap-[16px]">
               <span class="font-body text-[12px] text-[var(--foreground-muted)]">
                 Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalRow) }} of {{ totalRow }} users
@@ -242,6 +242,8 @@ async function fetchUsers() {
     totalPage.value = result.totalPage
   } catch {
     users.value = []
+    totalRow.value = 0
+    totalPage.value = 0
   } finally {
     loading.value = false
   }
@@ -268,6 +270,10 @@ async function handleDeleteUser() {
   try {
     await api.deleteUser(deleteTarget.value.id)
     deleteTarget.value = null
+    // If last item on page was deleted, go back one page
+    if (users.value.length <= 1 && currentPage.value > 1) {
+      currentPage.value--
+    }
     fetchUsers()
   } finally {
     deleting.value = false

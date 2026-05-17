@@ -179,9 +179,9 @@ async function handleRegister() {
   try {
     const user = await auth.register(userAccount.value, password.value, checkPassword.value)
     if (user.userRole === 'admin') {
-      router.push('/admin')
+      router.replace('/admin')
     } else {
-      router.push('/dashboard')
+      router.replace('/dashboard')
     }
   } catch (e) {
     error.value = e.message

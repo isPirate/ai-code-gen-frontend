@@ -40,14 +40,9 @@ async function fetchCurrentUser() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(u))
     return u
   } catch {
-    // Server verification failed — keep localStorage cache for offline display,
-    // but clear the reactive state so router guards will block protected pages.
-    // Only clear localStorage on explicit logout, not on network error.
-    if (user.value === cached) {
-      // No change, keep cached user for display on public pages
-    } else {
-      user.value = null
-    }
+    // Server verification failed — clear auth state so router guards block protected pages
+    user.value = null
+    localStorage.removeItem(STORAGE_KEY)
     return null
   } finally {
     loading.value = false

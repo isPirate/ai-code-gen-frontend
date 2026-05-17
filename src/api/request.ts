@@ -23,7 +23,7 @@ export default async function request<T = any>(
     method,
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...(method !== 'GET' ? { 'Content-Type': 'application/json' } : {}),
       ...headers,
     },
     ...rest,
@@ -33,8 +33,23 @@ export default async function request<T = any>(
     fetchOptions.body = JSON.stringify(data)
   }
 
-  const res = await fetch(fullUrl, fetchOptions)
-  const json = await res.json()
+  let res: Response
+  try {
+    res = await fetch(fullUrl, fetchOptions)
+  } catch {
+    throw new Error('网络请求失败，请检查网络连接')
+  }
+
+  if (!res.ok) {
+    throw new Error(`请求失败 (${res.status})`)
+  }
+
+  let json: any
+  try {
+    json = await res.json()
+  } catch {
+    throw new Error('服务器返回了无效的响应')
+  }
 
   // Auto-unwrap BaseResponse: code === 0 → return data
   if (json.code !== 0) {
