@@ -1,13 +1,13 @@
 # CodePilot 项目状态速查
 
-> 分支: `dsv4pro/ui-impl` | 提交: `c2d12fd` | 日期: 2026-05-15
+> 分支: `dsv4pro/ui-impl` | 提交: `5fa9b4c` | 日期: 2026-05-17
 
 ---
 
 ## 1. 快速启动
 
 ```bash
-cd dsv4-ui
+cd dsv4pro-ui
 npm install
 npm run dev        # http://localhost:5173
 npm run openapi2ts # 从后端 schema 重新生成 API
@@ -24,6 +24,7 @@ npm run openapi2ts # 从后端 schema 重新生成 API
 Vue 3 (Composition API) + Vite 6 + Tailwind CSS v4 + Vue Router 4 + lucide-vue-next
 API: @umijs/openapi 生成 → `src/api/generated/codepilot/`
 HTTP: 原生 fetch (credentials: include, session cookie)
+Markdown: marked + highlight.js
 
 ---
 
@@ -39,7 +40,7 @@ src/api/generated/codepilot/
   ├── healthController.ts
   ├── index.ts
   └── typings.d.ts         → 所有 TS 类型 (namespace API)
-src/api/client.js          → 业务 API 封装 + SSE 流式函数
+src/api/client.js          → 业务 API 封装 + SSE EventSource 流式函数
 ```
 
 ### 认证 (session cookie)
@@ -56,7 +57,7 @@ src/router/index.js → beforeEach 守卫检查 requiresAuth / requiresAdmin
 | /login | LoginPage | 公开 |
 | /register | RegisterPage | 公开 |
 | /dashboard | DashboardPage | requiresAuth |
-| /templates | TemplatesPage (精选应用) | requiresAuth |
+| /featured | TemplatesPage (精选应用) | requiresAuth |
 | /editor | EditorPage | requiresAuth |
 | /settings | SettingsPage | requiresAuth |
 | /admin | AdminDashboardPage | requiresAdmin |
@@ -87,13 +88,12 @@ src/router/index.js → beforeEach 守卫检查 requiresAuth / requiresAdmin
 | `POST /app/delete` | DashboardPage |
 | `GET /app/get/vo` | EditorPage |
 | `POST /app/my/list/page/vo` | DashboardPage |
-| `POST /app/good/list/page/vo` | TemplatesPage |
-| `GET /app/chat/gen/code` | EditorPage (SSE) |
+| `POST /app/good/list/page/vo` | TemplatesPage (Featured) |
+| `GET /app/chat/gen/code` | EditorPage (SSE EventSource) |
 | `POST /app/deploy` | EditorPage |
 | `POST /app/admin/list/page/vo` | AdminProjectsPage |
 | `POST /app/admin/update` | AdminProjectsPage |
 | `POST /app/admin/delete` | AdminProjectsPage |
-| `GET /health/` | client.js (封装, 未使用) |
 | `GET /api/static/{deployKey}/**` | 预览 iframe |
 
 ### 未对接
@@ -114,15 +114,18 @@ src/router/index.js → beforeEach 守卫检查 requiresAuth / requiresAdmin
 用户输入提示词 → `addApp({ initPrompt })` → 得到 appId → 跳转 `/editor?appId={id}`
 
 ### 流程 2: Dashboard 新建项目
-点击"新建项目" → 跳转 `/editor`(无appId) → 输入第一句话 → Editor调用`addApp` → SSE对话
+点击"New Project" → 跳转 `/editor`(无appId) → 输入第一句话 → Editor调用`addApp` → SSE对话
 
 ### 流程 3: AI 对话生成代码
-进入Editor → 获取app信息 → 自动发送initPrompt → SSE流式输出 → 完成后iframe预览
+进入Editor → 获取app信息 → 自动发送initPrompt → EventSource SSE流式输出(Markdown实时渲染) → 完成后iframe预览
 
 ### 流程 4: 部署
 点击 Deploy → `deployApp({ appId })` → 弹窗+工具栏URL
 
-### 流程 5: 会话恢复
+### 流程 5: 管理端精选管理
+AdminProjectsPage → 点击 Star 按钮 → `updateAppByAdmin({ id, priority: 99 })` → Featured 页展示
+
+### 流程 6: 会话恢复
 `main.js` → `auth.init()` → `GET /user/get/login` → 恢复user / 失败置null → router守卫生效
 
 ---
@@ -131,16 +134,19 @@ src/router/index.js → beforeEach 守卫检查 requiresAuth / requiresAdmin
 
 | 功能 | 文件:行号 |
 |------|----------|
-| SSE 流式函数 | `src/api/client.js:77` |
+| SSE EventSource 流式 | `src/api/client.js:77` |
 | request 自动解包 | `src/api/request.ts:40` |
-| Editor 发送消息 | `src/pages/EditorPage.vue:268` |
-| Editor 智能滚动 | `src/pages/EditorPage.vue:220` |
-| Editor 部署 | `src/pages/EditorPage.vue:325` |
-| Dashboard 数据加载 | `src/pages/DashboardPage.vue:175` |
-| Admin 分页加载 | `src/pages/admin/AdminProjectsPage.vue:245` |
+| Markdown 渲染组件 | `src/components/MarkdownRenderer.vue` |
+| Editor 发送消息 | `src/pages/EditorPage.vue` |
+| Editor 可拖拽分隔条 | `src/pages/EditorPage.vue` (chatWidth ref + onResizeStart/Move/End) |
+| Editor 消息复制 | `src/pages/EditorPage.vue` (copyMsg + copiedIdx) |
+| Editor 部署 | `src/pages/EditorPage.vue` |
+| Dashboard 数据加载 | `src/pages/DashboardPage.vue` |
+| Featured 精选列表 | `src/pages/TemplatesPage.vue` (fetchApps, priority=99) |
+| Admin 分页+筛选 | `src/pages/admin/AdminProjectsPage.vue` (多字段联合筛选) |
+| Admin 精选开关 | `src/pages/admin/AdminProjectsPage.vue` (toggleFeatured) |
 | Auth store | `src/stores/auth.js` |
 | 路由守卫 | `src/router/index.js:75` |
-| Navbar 登录状态 | `src/components/Navbar.vue` |
 
 ---
 
@@ -158,6 +164,9 @@ src/router/index.js → beforeEach 守卫检查 requiresAuth / requiresAdmin
 AppVO = { id, appName, cover, initPrompt, codeGenType, deployKey, deployedTime, priority, userId, createTime, updateTime, user?: UserVO }
 ```
 
+### 精选逻辑
+`priority === 99` 表示精选应用，`listGoodAppVoByPage` 需传 `{ priority: 99 }` 筛选
+
 ### 预览 URL 格式
 `/api/static/{codeGenType}_{appId}/`
 
@@ -171,19 +180,19 @@ AppVO = { id, appName, cover, initPrompt, codeGenType, deployKey, deployedTime, 
 
 ## 8. SSE 关键细节
 
-### 后端格式(Spring ServerSentEvent)
+### 后端格式 (Spring ServerSentEvent)
 ```
 data:{"d":"content chunk"}
 event:done
 data:
 ```
 
-### 前端实现(client.js)
-使用原生 `fetch` + `response.body.getReader()` 手动解析。
-**已尝试 EventSource 但因自动重连导致后端 `java.io.IOException: closed` 而放弃。**
+### 前端实现 (client.js)
+使用 `EventSource` + `addEventListener('done')` 监听结束事件。
+`closed` 标志位正确区分正常关闭 (done事件) 和异常关闭 (onerror)。
 
 ### 消息格式匹配
-后端 `data:` 后无空格: `data:{"d":"..."}`。解析代码用 `.trim()` 兼容两种格式。
+后端 `data:` 后无空格: `data:{"d":"..."}`。`onmessage` 中 `JSON.parse(event.data)` 解析，检查 `parsed.d` 字段。
 
 ---
 
@@ -204,4 +213,5 @@ data:
 2. 管理端统计页 (AdminDashboardPage) 仍用 mock 数据
 3. 管理端系统设置页 (AdminSystemSettingsPage) 仍用 mock
 4. `getAppVOByIdByAdmin` 已封装但未使用
-5. 编辑器历史消息在刷新后丢失
+5. 编辑器历史消息在刷新后丢失 (无持久化)
+6. Dashboard "新建项目" 卡片 UI 与空数据网格排列不一致

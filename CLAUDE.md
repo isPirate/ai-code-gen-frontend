@@ -28,6 +28,8 @@ src/
 │       └── codepilot/
 │           ├── index.ts
 │           ├── userController.ts
+│           ├── appController.ts
+│           ├── staticResourceController.ts
 │           ├── healthController.ts
 │           └── typings.d.ts
 ├── stores/
@@ -35,21 +37,22 @@ src/
 ├── components/
 │   ├── Navbar.vue            # Landing 页导航栏
 │   ├── AppFooter.vue         # 全局页脚
-│   ├── AppSidebar.vue        # 用户端侧边栏 (Projects/Templates/Settings)
+│   ├── AppSidebar.vue        # 用户端侧边栏 (Projects/Featured/Settings)
+│   ├── MarkdownRenderer.vue   # Markdown 渲染 (marked + highlight.js)
 │   └── AdminSidebar.vue      # 管理端侧边栏 (含 Admin 徽标)
 └── pages/
     ├── LandingPage.vue       # /         Hero + Prompt + Mockup + Steps + CTA
     ├── LoginPage.vue         # /login    左侧品牌 + 右侧登录表单 (userAccount)
     ├── RegisterPage.vue      # /register 左侧品牌+评价 + 右侧注册表单
-    ├── DashboardPage.vue     # /dashboard  项目卡片网格 + 新建
-    ├── TemplatesPage.vue     # /templates  分类标签 + 2 列模板卡片
-    ├── EditorPage.vue        # /editor    AI 聊天面板 + 实时预览
+    ├── DashboardPage.vue     # /dashboard  项目卡片网格 + 新建 + 搜索 + 重命名/删除
+    ├── TemplatesPage.vue     # /featured  精选应用展示 (2 列卡片 + 搜索)
+    ├── EditorPage.vue        # /editor    AI 聊天面板 + Markdown 渲染 + 可拖拽 + 实时预览
     ├── SettingsPage.vue      # /settings  Profile 表单 + Danger Zone
     └── admin/
-        ├── AdminDashboardPage.vue      # /admin          统计卡片 + 图表 + 活动
+        ├── AdminDashboardPage.vue      # /admin          统计卡片 + 图表 + 活动 (mock)
         ├── AdminUsersPage.vue          # /admin/users    用户表格 + 分页 + 新增/删除
-        ├── AdminProjectsPage.vue       # /admin/projects 项目表格 (静态数据)
-        └── AdminSystemSettingsPage.vue # /admin/settings AI 配置 + 用量限制
+        ├── AdminProjectsPage.vue       # /admin/projects 项目表格 + 多字段筛选 + 精选管理
+        └── AdminSystemSettingsPage.vue # /admin/settings AI 配置 + 用量限制 (mock)
 ```
 
 ## 设计风格
@@ -88,12 +91,21 @@ npm run openapi2ts   # 重新生成 src/api/generated/
 | POST /user/add | AdminUsersPage |
 | POST /user/update | SettingsPage |
 | POST /user/delete | AdminUsersPage / SettingsPage |
-| GET /health/ | client.js (已封装，未使用) |
+| POST /app/add | LandingPage, EditorPage |
+| POST /app/update | DashboardPage |
+| POST /app/delete | DashboardPage |
+| GET /app/get/vo | EditorPage |
+| POST /app/my/list/page/vo | DashboardPage |
+| POST /app/good/list/page/vo | TemplatesPage(Featured) |
+| GET /app/chat/gen/code | EditorPage (SSE EventSource) |
+| POST /app/deploy | EditorPage |
+| POST /app/admin/list/page/vo | AdminProjectsPage |
+| POST /app/admin/update | AdminProjectsPage |
+| POST /app/admin/delete | AdminProjectsPage |
 
 ### 未对接接口（待后端开发）
-- 项目相关 CRUD（DashboardPage / AdminProjectsPage 当前使用静态 mock 数据）
 - 统计相关（AdminDashboardPage 使用静态 mock 数据）
-- Templates 相关（TemplatesPage 使用静态 mock 数据）
+- 系统配置相关（AdminSystemSettingsPage 使用静态 mock）
 
 ## 认证体系
 
@@ -120,7 +132,7 @@ npm run openapi2ts   # 重新生成 src/api/generated/
 | 角色 | 路由 |
 |------|------|
 | 游客 (未登录) | /, /login, /register |
-| user | /dashboard, /templates, /editor, /settings |
+| user | /dashboard, /featured, /editor, /settings |
 | admin | 所有 user 路由 + /admin, /admin/users, /admin/projects, /admin/settings |
 
 ## 路由设计
@@ -131,7 +143,7 @@ npm run openapi2ts   # 重新生成 src/api/generated/
 | /login | LoginPage | - |
 | /register | RegisterPage | - |
 | /dashboard | DashboardPage | requiresAuth |
-| /templates | TemplatesPage | requiresAuth |
+| /featured | TemplatesPage | requiresAuth |
 | /editor | EditorPage | requiresAuth |
 | /settings | SettingsPage | requiresAuth |
 | /admin | AdminDashboardPage | requiresAuth + requiresAdmin |
