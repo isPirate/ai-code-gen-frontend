@@ -14,7 +14,7 @@
         <div class="flex flex-col gap-[8px]">
           <span class="font-body text-[13px] font-medium text-[var(--foreground-primary)]">Product</span>
           <a href="#" class="font-body text-[13px] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">Features</a>
-          <a href="#" class="font-body text-[13px] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">Templates</a>
+          <a href="#" class="font-body text-[13px] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">Featured</a>
           <a href="#" class="font-body text-[13px] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">Pricing</a>
           <a href="#" class="font-body text-[13px] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">Changelog</a>
         </div>

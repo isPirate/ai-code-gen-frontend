@@ -41,7 +41,7 @@
     <!-- Body -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Chat Panel -->
-      <div class="flex flex-col w-[360px] bg-white border-r border-[var(--border-subtle)] relative">
+      <div class="flex flex-col bg-white border-r border-[var(--border-subtle)] relative" :style="{ width: chatWidth + 'px', minWidth: chatWidth + 'px' }">
         <div class="flex items-center h-[48px] px-[16px] border-b border-[var(--border-subtle)] gap-[8px]">
           <Sparkles :size="18" class="text-[var(--accent-primary)]" />
           <span class="font-body text-[14px] font-medium text-[var(--foreground-primary)]">AI Assistant</span>
@@ -58,14 +58,16 @@
                 <Sparkles :size="14" class="text-white" />
               </div>
               <div
-                :class="[
-                  'rounded-[12px] p-[10px_14px] font-body text-[13px] leading-relaxed max-w-[260px] whitespace-pre-wrap',
-                  msg.role === 'user'
-                    ? 'bg-[var(--accent-primary)] text-white rounded-tr-[4px]'
-                    : 'bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px]'
-                ]"
+                v-if="msg.role === 'user'"
+                class="rounded-[12px] p-[10px_14px] bg-[var(--accent-primary)] text-white rounded-tr-[4px] font-body text-[13px] leading-relaxed max-w-[260px] whitespace-pre-wrap"
               >
                 {{ msg.text }}
+              </div>
+              <div
+                v-else
+                class="rounded-[12px] p-[14px_18px] bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px] flex-1 min-w-0"
+              >
+                <MarkdownRenderer :content="msg.text" />
               </div>
             </div>
 
@@ -102,8 +104,16 @@
         </div>
       </div>
 
+      <!-- Resize Handle -->
+      <div
+        class="w-[5px] bg-transparent hover:bg-[var(--accent-primary)] cursor-col-resize flex-shrink-0 transition-colors relative group"
+        @mousedown="onResizeStart"
+      >
+        <div class="absolute inset-y-0 -left-[4px] -right-[4px]"></div>
+      </div>
+
       <!-- Preview Panel -->
-      <div class="flex flex-col flex-1 bg-[var(--surface-secondary)]">
+      <div class="flex flex-col flex-1 bg-[var(--surface-secondary)] min-w-0">
         <div class="flex items-center h-[48px] px-[16px] border-b border-[var(--border-subtle)] bg-white gap-[16px]">
           <div class="flex items-center gap-[8px]">
             <span class="w-[10px] h-[10px] rounded-full bg-[#FF5F57]"></span>
@@ -182,13 +192,16 @@
         </div>
       </div>
     </div>
+    <!-- Drag overlay — captures mouse events over iframe -->
+    <div v-if="resizing" class="fixed inset-0 z-[9999] cursor-col-resize" @mousemove="onResizeMove" @mouseup="onResizeEnd"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, ChevronDown, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
 
 const route = useRoute()
@@ -227,6 +240,40 @@ function scrollToBottom() {
     }
   })
 }
+
+// Resize chat panel
+const chatWidth = ref(420)
+const resizing = ref(false)
+
+function onResizeStart(e) {
+  e.preventDefault()
+  resizing.value = true
+  document.body.style.userSelect = 'none'
+  document.body.style.cursor = 'col-resize'
+  document.addEventListener('mousemove', onResizeMove)
+  document.addEventListener('mouseup', onResizeEnd)
+}
+
+function onResizeMove(e) {
+  if (!resizing.value) return
+  const w = Math.max(300, Math.min(e.clientX, window.innerWidth * 0.6))
+  requestAnimationFrame(() => { chatWidth.value = w })
+}
+
+function onResizeEnd() {
+  resizing.value = false
+  document.body.style.userSelect = ''
+  document.body.style.cursor = ''
+  document.removeEventListener('mousemove', onResizeMove)
+  document.removeEventListener('mouseup', onResizeEnd)
+}
+
+onUnmounted(() => {
+  document.body.style.userSelect = ''
+  document.body.style.cursor = ''
+  document.removeEventListener('mousemove', onResizeMove)
+  document.removeEventListener('mouseup', onResizeEnd)
+})
 
 onMounted(async () => {
   if (!appId.value) {

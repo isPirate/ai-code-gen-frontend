@@ -113,14 +113,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
-import { Search, Plus, MonitorDot, Store, ScrollText, Palette, Pencil, Trash2 } from 'lucide-vue-next'
+import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2 } from 'lucide-vue-next'
 import { api } from '../api/client'
 
 const router = useRouter()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
-  { to: '/templates', label: 'Templates', icon: Store },
+  { to: '/featured', label: 'Featured', icon: Star },
   { to: '/settings', label: 'Settings', icon: Palette },
 ]
 

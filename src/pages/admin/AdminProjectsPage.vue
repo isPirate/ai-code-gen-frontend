@@ -7,23 +7,44 @@
       <div class="flex items-center justify-between h-[64px] px-[16px] lg:px-[32px] bg-white border-b border-[var(--border-subtle)] gap-[12px]">
         <h1 class="font-heading text-[20px] lg:text-[24px] font-bold text-[var(--foreground-primary)]">Project Management</h1>
         <div class="flex items-center gap-[12px]">
-          <div class="flex items-center gap-[8px] h-[36px] px-[12px] rounded-[8px] border border-[#E5E7EB] w-[240px]">
-            <Search :size="14" class="text-[var(--foreground-muted)]" />
-            <input v-model="search" @input="onSearchInput" placeholder="Search projects..." class="flex-1 font-body text-[12px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
+          <div class="flex items-center gap-[8px]">
+            <div class="flex items-center gap-[6px] h-[36px] px-[10px] rounded-[8px] border border-[#E5E7EB] w-[160px]">
+              <Search :size="13" class="text-[var(--foreground-muted)] flex-shrink-0" />
+              <input v-model="filterAppName" @input="onFilterChange" placeholder="Project name..." class="flex-1 font-body text-[12px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
+            </div>
+            <div class="flex items-center gap-[6px] h-[36px] px-[10px] rounded-[8px] border border-[#E5E7EB] w-[140px]">
+              <User :size="13" class="text-[var(--foreground-muted)] flex-shrink-0" />
+              <input v-model="filterOwner" @input="onFilterChange" placeholder="Owner..." class="flex-1 font-body text-[12px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent" />
+            </div>
+            <div class="flex items-center gap-[6px] h-[36px] px-[10px] rounded-[8px] border border-[#E5E7EB] w-[150px]">
+              <Tag :size="13" class="text-[var(--foreground-muted)] flex-shrink-0" />
+              <select v-model="filterType" @change="onFilterChange" class="flex-1 font-body text-[12px] text-[var(--foreground-primary)] outline-none bg-transparent cursor-pointer">
+                <option value="">All types</option>
+                <option value="html">HTML</option>
+                <option value="multi_file">Multi File</option>
+              </select>
+            </div>
+            <button v-if="hasFilters" @click="clearFilters" class="flex-shrink-0 w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors" title="Clear filters">
+              <X :size="14" />
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Table Container -->
-      <div class="flex-1 overflow-auto p-[20px] lg:p-[32px]" @click.self="openMenuId = null">
+      <div class="flex-1 overflow-auto p-[20px] lg:p-[32px]">
         <div class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden overflow-x-auto min-h-full">
           <!-- Table Header -->
           <div class="flex items-center h-[48px] px-[20px]" style="background:#F0F1F3">
-            <div class="w-[260px] font-body text-[13px] font-bold text-[#4A4A4A]">Project</div>
-            <div class="w-[160px] font-body text-[13px] font-bold text-[#4A4A4A]">Owner</div>
-            <div class="w-[100px] font-body text-[13px] font-bold text-[#4A4A4A]">Status</div>
-            <div class="w-[120px] font-body text-[13px] font-bold text-[#4A4A4A]">Created</div>
-            <div class="w-[80px] font-body text-[13px] font-bold text-[#4A4A4A]">Actions</div>
+            <div class="w-[200px] font-body text-[13px] font-bold text-[#4A4A4A]">Project</div>
+            <div class="w-[120px] font-body text-[13px] font-bold text-[#4A4A4A]">Owner</div>
+            <div class="w-[90px] font-body text-[13px] font-bold text-[#4A4A4A]">Type</div>
+            <div class="w-[130px] font-body text-[13px] font-bold text-[#4A4A4A]">Cover</div>
+            <div class="w-[70px] font-body text-[13px] font-bold text-[#4A4A4A]">Priority</div>
+            <div class="w-[90px] font-body text-[13px] font-bold text-[#4A4A4A]">Status</div>
+            <div class="w-[110px] font-body text-[13px] font-bold text-[#4A4A4A]">Deployed</div>
+            <div class="w-[100px] font-body text-[13px] font-bold text-[#4A4A4A]">Created</div>
+            <div class="flex-1 font-body text-[13px] font-bold text-[#4A4A4A] text-right">Actions</div>
           </div>
 
           <!-- Loading -->
@@ -39,14 +60,28 @@
               class="flex items-center h-[48px] px-[20px] hover:bg-[var(--surface-secondary)] transition-colors"
               :style="{ borderTop: idx === 0 ? 'none' : '1px solid var(--border-subtle)' }"
             >
-              <div class="flex items-center gap-[10px] w-[260px]">
+              <div class="flex items-center gap-[10px] w-[200px]">
                 <div class="w-[32px] h-[32px] rounded-[6px] flex items-center justify-center flex-shrink-0" :style="{ background: iconBgs[(project.id || 0) % iconBgs.length] }">
                   <component :is="icons[(project.id || 0) % icons.length]" :size="16" class="text-white" />
                 </div>
-                <span class="font-body text-[13px] text-[var(--foreground-primary)]">{{ project.appName || 'Untitled' }}</span>
+                <span class="font-body text-[13px] text-[var(--foreground-primary)] truncate">{{ project.appName || 'Untitled' }}</span>
+                <Star v-if="project.priority == 99" :size="12" class="text-[var(--accent-primary)] fill-[var(--accent-primary)] flex-shrink-0" />
               </div>
-              <span class="w-[160px] font-body text-[13px] text-[var(--foreground-secondary)]">{{ project.user?.userName || '-' }}</span>
-              <div class="w-[100px]">
+              <span class="w-[120px] font-body text-[13px] text-[var(--foreground-secondary)] truncate">{{ project.user?.userName || '-' }}</span>
+              <div class="w-[90px]">
+                <span class="px-[6px] py-[2px] rounded-[4px] bg-[var(--surface-secondary)] font-caption text-[11px] text-[var(--foreground-secondary)]">{{ typeLabel(project.codeGenType) }}</span>
+              </div>
+              <div class="w-[130px] flex items-center">
+                <img v-if="project.cover" :src="project.cover" class="w-[36px] h-[36px] rounded-[6px] object-cover border border-[var(--border-subtle)]" :title="project.cover" />
+                <div v-else class="w-[36px] h-[36px] rounded-[6px] bg-[var(--surface-secondary)] flex items-center justify-center border border-[var(--border-subtle)]">
+                  <Image :size="16" class="text-[var(--foreground-muted)]" />
+                </div>
+              </div>
+              <div class="w-[70px]">
+                <span v-if="project.priority == 99" class="inline-block px-[8px] py-[3px] rounded-full font-caption text-[11px] text-[var(--accent-primary)]" style="background:#FFF3E0">Featured</span>
+                <span v-else class="font-body text-[12px] text-[var(--foreground-muted)]">-</span>
+              </div>
+              <div class="w-[90px]">
                 <span
                   :class="['inline-block px-[8px] py-[3px] rounded-full font-caption text-[11px]', statusClass(project)]"
                   :style="{ background: statusBg(project) }"
@@ -54,25 +89,21 @@
                   {{ project.deployKey ? 'Deployed' : 'Draft' }}
                 </span>
               </div>
-              <span class="w-[120px] font-body text-[13px] text-[var(--foreground-secondary)]">{{ formatDate(project.createTime) }}</span>
-              <div class="w-[80px] flex justify-center relative">
-                <button @click="toggleMenu(project.id)" class="text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] transition-colors">
-                  <Ellipsis :size="16" />
+              <span class="w-[110px] font-body text-[12px] text-[var(--foreground-secondary)]">{{ project.deployedTime ? formatDate(project.deployedTime) : '-' }}</span>
+              <span class="w-[100px] font-body text-[12px] text-[var(--foreground-secondary)]">{{ formatDate(project.createTime) }}</span>
+              <div class="flex-1 flex items-center justify-end gap-[4px]">
+                <button @click="viewProject(project)" class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors" title="View">
+                  <Eye :size="15" />
                 </button>
-                <!-- Dropdown Menu -->
-                <div v-if="openMenuId === project.id"
-                  class="absolute top-[100%] right-0 z-10 bg-white rounded-[8px] border border-[var(--border-subtle)] shadow-lg py-[4px] min-w-[120px]"
-                  @click.stop>
-                  <button @click="viewProject(project)" class="flex items-center gap-[6px] w-full px-[12px] py-[6px] font-body text-[12px] text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] text-left">
-                    <Eye :size="14" /> View
-                  </button>
-                  <button @click="openEdit(project)" class="flex items-center gap-[6px] w-full px-[12px] py-[6px] font-body text-[12px] text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] text-left">
-                    <Pencil :size="14" /> Edit
-                  </button>
-                  <button @click="handleDelete(project)" class="flex items-center gap-[6px] w-full px-[12px] py-[6px] font-body text-[12px] text-red-600 hover:bg-red-50 text-left">
-                    <Trash2 :size="14" /> Delete
-                  </button>
-                </div>
+                <button @click="openEdit(project)" class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors" title="Edit">
+                  <Pencil :size="15" />
+                </button>
+                <button @click="toggleFeatured(project)" class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center transition-colors" :class="project.priority == 99 ? 'text-[var(--accent-primary)] hover:bg-[#FFF3E0]' : 'text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)]'" :title="project.priority == 99 ? 'Unset Featured' : 'Set Featured'">
+                  <Star :size="15" :class="project.priority == 99 ? 'fill-[var(--accent-primary)]' : ''" />
+                </button>
+                <button @click="handleDelete(project)" class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--foreground-muted)] hover:text-red-500 hover:bg-red-50 transition-colors" title="Delete">
+                  <Trash2 :size="15" />
+                </button>
               </div>
             </div>
 
@@ -176,7 +207,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminSidebar from '../../components/AdminSidebar.vue'
-import { LayoutDashboard, Users, Folder, Settings, Search, Ellipsis, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool, Eye, Pencil, Trash2 } from 'lucide-vue-next'
+import { LayoutDashboard, Users, Folder, Settings, Search, User, Tag, X, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool, Eye, Pencil, Star, Image, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api/client'
 
 const router = useRouter()
@@ -188,7 +219,9 @@ const navItems = [
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
-const search = ref('')
+const filterAppName = ref('')
+const filterOwner = ref('')
+const filterType = ref('')
 const projects = ref([])
 const loading = ref(false)
 const currentPage = ref(1)
@@ -196,7 +229,6 @@ const pageSize = ref(10)
 const totalRow = ref(0)
 const totalPage = ref(0)
 const searchTimer = ref(null)
-const openMenuId = ref(null)
 
 const showEditModal = ref(false)
 const editTarget = ref(null)
@@ -217,6 +249,7 @@ const visiblePages = computed(() => {
   return pages
 })
 
+const hasFilters = computed(() => filterAppName.value || filterOwner.value || filterType.value)
 const showDots = computed(() => totalPage.value > 5 && currentPage.value + 2 < totalPage.value)
 
 function statusClass(project) {
@@ -226,6 +259,9 @@ function statusClass(project) {
 function statusBg(project) {
   return project.deployKey ? '#E8F5E9' : '#FFF3E0'
 }
+
+const TYPE_LABELS = { html: 'HTML', multi_file: 'Multi File' }
+function typeLabel(v) { return TYPE_LABELS[v] || v || '-' }
 
 function formatDate(d) {
   if (!d) return ''
@@ -239,8 +275,14 @@ async function fetchProjects() {
       pageNum: currentPage.value,
       pageSize: pageSize.value,
     }
-    if (search.value.trim()) {
-      params.appName = search.value.trim()
+    if (filterAppName.value.trim()) {
+      params.appName = filterAppName.value.trim()
+    }
+    if (filterOwner.value.trim()) {
+      params.userName = filterOwner.value.trim()
+    }
+    if (filterType.value.trim()) {
+      params.codeGenType = filterType.value.trim()
     }
     const result = await api.listAppVOPageByAdmin(params)
     projects.value = result.records || []
@@ -255,12 +297,20 @@ async function fetchProjects() {
   }
 }
 
-function onSearchInput() {
+function onFilterChange() {
   clearTimeout(searchTimer.value)
   searchTimer.value = setTimeout(() => {
     currentPage.value = 1
     fetchProjects()
   }, 300)
+}
+
+function clearFilters() {
+  filterAppName.value = ''
+  filterOwner.value = ''
+  filterType.value = ''
+  currentPage.value = 1
+  fetchProjects()
 }
 
 function goPage(p) {
@@ -269,17 +319,11 @@ function goPage(p) {
   fetchProjects()
 }
 
-function toggleMenu(id) {
-  openMenuId.value = openMenuId.value === id ? null : id
-}
-
 function viewProject(project) {
-  openMenuId.value = null
   router.push({ path: '/editor', query: { appId: project.id } })
 }
 
 function openEdit(project) {
-  openMenuId.value = null
   editTarget.value = project
   editForm.value = {
     appName: project.appName || '',
@@ -310,8 +354,20 @@ async function confirmEdit() {
 }
 
 function handleDelete(project) {
-  openMenuId.value = null
   deleteTarget.value = project
+}
+
+async function toggleFeatured(project) {
+  const isFeatured = project.priority == 99
+  try {
+    await api.updateAppByAdmin({
+      id: project.id,
+      priority: isFeatured ? 0 : 99,
+    })
+    await fetchProjects()
+  } catch (e) {
+    console.error('Toggle featured failed:', e)
+  }
 }
 
 async function confirmDelete() {

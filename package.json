@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "codepilot-ui": "file:",
+    "highlight.js": "^11.11.1",
     "lucide-vue-next": "^0.460.0",
+    "marked": "^18.0.3",
     "tslib": "^2.8.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

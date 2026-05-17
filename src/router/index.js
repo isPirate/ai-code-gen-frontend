@@ -24,8 +24,8 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/templates',
-    name: 'templates',
+    path: '/featured',
+    name: 'featured',
     component: () => import('../pages/TemplatesPage.vue'),
     meta: { requiresAuth: true },
   },

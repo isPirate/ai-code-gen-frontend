@@ -6,7 +6,7 @@
     </div>
     <div class="hidden lg:flex items-center gap-[32px]">
       <a href="#features" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Features</a>
-      <a href="#templates" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Templates</a>
+      <a href="#featured" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Featured</a>
       <a href="#pricing" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Pricing</a>
       <a href="#docs" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Docs</a>
     </div>

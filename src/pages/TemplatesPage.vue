@@ -25,30 +25,30 @@
         </div>
 
         <!-- Empty -->
-        <div v-else-if="templates.length === 0" class="flex items-center justify-center h-[200px]">
+        <div v-else-if="apps.length === 0" class="flex items-center justify-center h-[200px]">
           <span class="font-body text-[14px] text-[var(--foreground-muted)]">No featured apps found.</span>
         </div>
 
         <!-- Apps Grid -->
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-[16px] lg:gap-[20px] w-full">
           <div
-            v-for="tpl in templates"
-            :key="tpl.id"
+            v-for="app in apps"
+            :key="app.id"
             class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_#00000006] hover:shadow-[0_4px_16px_#0000000A] transition-shadow cursor-pointer"
           >
-            <div class="flex items-center justify-center h-[140px]" :style="{ background: projectGradient(tpl) }">
-              <component :is="projectIcon(tpl)" :size="40" class="text-white/40" />
+            <div class="flex items-center justify-center h-[140px]" :style="{ background: projectGradient(app) }">
+              <component :is="projectIcon(app)" :size="40" class="text-white/40" />
             </div>
             <div class="flex flex-col gap-[6px] p-[16px_20px]">
               <div class="flex items-center justify-between">
-                <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">{{ tpl.appName || 'Untitled' }}</h3>
-                <span class="font-caption text-[12px] text-[var(--foreground-muted)]">{{ tpl.codeGenType || 'App' }}</span>
+                <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">{{ app.appName || 'Untitled' }}</h3>
+                <span class="font-caption text-[12px] text-[var(--foreground-muted)]">{{ app.codeGenType || 'App' }}</span>
               </div>
-              <p class="font-body text-[13px] text-[var(--foreground-secondary)] line-clamp-2">{{ tpl.initPrompt || 'No description' }}</p>
+              <p class="font-body text-[13px] text-[var(--foreground-secondary)] line-clamp-2">{{ app.initPrompt || 'No description' }}</p>
               <div class="flex items-center justify-between mt-[4px]">
-                <span class="font-caption text-[11px] text-[var(--foreground-muted)]">By {{ tpl.user?.userName || 'Unknown' }}</span>
-                <button @click="useTemplate(tpl)" class="px-[12px] py-[6px] rounded-[6px] bg-[var(--accent-primary)] font-body text-[12px] text-white font-medium hover:bg-[var(--accent-hover)] transition-colors">
-                  Use Template
+                <span class="font-caption text-[11px] text-[var(--foreground-muted)]">By {{ app.user?.userName || 'Unknown' }}</span>
+                <button @click="viewApp(app)" class="px-[12px] py-[6px] rounded-[6px] bg-[var(--accent-primary)] font-body text-[12px] text-white font-medium hover:bg-[var(--accent-hover)] transition-colors">
+                  View Project
                 </button>
               </div>
             </div>
@@ -63,19 +63,19 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
-import { MonitorDot, Store, ScrollText, Palette, Search } from 'lucide-vue-next'
+import { MonitorDot, Star, Store, ScrollText, Palette, Search } from 'lucide-vue-next'
 import { api } from '../api/client'
 
 const router = useRouter()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
-  { to: '/templates', label: 'Templates', icon: Store },
+  { to: '/featured', label: 'Featured', icon: Star },
   { to: '/settings', label: 'Settings', icon: Palette },
 ]
 
 const search = ref('')
-const templates = ref([])
+const apps = ref([])
 const loading = ref(false)
 const error = ref('')
 const searchTimer = ref(null)
@@ -96,28 +96,28 @@ const gradients = [
   'linear-gradient(135deg, #2E1A1A, #5E2D1B)',
 ]
 
-function projectIcon(tpl) {
-  const type = (tpl.codeGenType || '').toLowerCase()
+function projectIcon(app) {
+  const type = (app.codeGenType || '').toLowerCase()
   return iconMap[type] || MonitorDot
 }
 
-function projectGradient(tpl) {
-  return gradients[(tpl.id || 0) % gradients.length]
+function projectGradient(app) {
+  return gradients[(app.id || 0) % gradients.length]
 }
 
-async function fetchTemplates() {
+async function fetchApps() {
   loading.value = true
   error.value = ''
   try {
-    const params = { pageSize: 50 }
+    const params = { pageSize: 20, priority: 99 }
     if (search.value.trim()) {
       params.appName = search.value.trim()
     }
     const result = await api.listGoodAppVOPage(params)
-    templates.value = result.records || []
+    apps.value = result.records || []
   } catch (e) {
     error.value = e.message || 'Failed to load apps'
-    templates.value = []
+    apps.value = []
   } finally {
     loading.value = false
   }
@@ -125,12 +125,12 @@ async function fetchTemplates() {
 
 function onSearchInput() {
   clearTimeout(searchTimer.value)
-  searchTimer.value = setTimeout(fetchTemplates, 300)
+  searchTimer.value = setTimeout(fetchApps, 300)
 }
 
-function useTemplate(tpl) {
-  router.push({ path: '/editor', query: { appId: tpl.id } })
+function viewApp(app) {
+  router.push({ path: '/editor', query: { appId: app.id } })
 }
 
-onMounted(fetchTemplates)
+onMounted(fetchApps)
 </script>

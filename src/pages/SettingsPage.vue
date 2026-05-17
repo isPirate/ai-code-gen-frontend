@@ -96,7 +96,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
-import { MonitorDot, Store, Palette, User, Bell, CreditCard } from 'lucide-vue-next'
+import { MonitorDot, Star, Palette, User, Bell, CreditCard } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
 import { api } from '../api/client'
 
@@ -105,7 +105,7 @@ const auth = useAuth()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
-  { to: '/templates', label: 'Templates', icon: Store },
+  { to: '/featured', label: 'Featured', icon: Star },
   { to: '/settings', label: 'Settings', icon: Palette },
 ]
 
