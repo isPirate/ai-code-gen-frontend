@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "codepilot-ui": "file:",
+    "dompurify": "^3.4.5",
     "highlight.js": "^11.11.1",
     "lucide-vue-next": "^0.460.0",
     "marked": "^18.0.3",

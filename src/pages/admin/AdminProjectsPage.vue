@@ -79,7 +79,7 @@
               </div>
               <div class="w-[70px]">
                 <span v-if="project.priority == 99" class="inline-block px-[8px] py-[3px] rounded-full font-caption text-[11px] text-[var(--accent-primary)]" style="background:#FFF3E0">Featured</span>
-                <span v-else class="font-body text-[12px] text-[var(--foreground-muted)]">-</span>
+                <span v-else class="font-body text-[12px] text-[var(--foreground-muted)]">{{ project.priority }}</span>
               </div>
               <div class="w-[90px]">
                 <span
@@ -274,6 +274,8 @@ async function fetchProjects() {
     const params = {
       pageNum: currentPage.value,
       pageSize: pageSize.value,
+      sortField: 'priority',
+      sortOrder: 'descend',
     }
     if (filterAppName.value.trim()) {
       params.appName = filterAppName.value.trim()

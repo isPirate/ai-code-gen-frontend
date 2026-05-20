@@ -209,7 +209,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, triggerRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
@@ -330,7 +330,11 @@ onMounted(async () => {
     loadingApp.value = false
 
     if (result.initPrompt && !result.codeGenType) {
-      await sendMessage(result.initPrompt)
+      messages.value = [
+        { role: 'user', text: result.initPrompt },
+        { role: 'ai', text: "Ready to generate based on your description. Click the send button or press Enter to start." },
+      ]
+      chatInput.value = result.initPrompt
     } else {
       messages.value = [
         { role: 'ai', text: "Hi! I'm your AI assistant. Describe the app you want to build, and I'll generate it for you." },
@@ -343,9 +347,14 @@ onMounted(async () => {
 })
 
 async function sendMessage(text) {
-  if (text && typeof text !== 'string') text = undefined
-  const msg = (text || chatInput.value.trim())
+  const msg = typeof text === 'string' ? text : chatInput.value.trim()
   if (!msg || streaming.value) return
+
+  // Close any stale SSE connection before starting a new one
+  if (eventSource) {
+    eventSource.close()
+    eventSource = null
+  }
 
   chatInput.value = ''
 
@@ -376,7 +385,7 @@ async function sendMessage(text) {
     msg,
     (chunk) => {
       aiMsg.text += chunk
-      messages.value = [...messages.value]
+      triggerRef(messages)
       if (nearBottom.value) scrollToBottom()
     },
     async () => {
@@ -392,7 +401,7 @@ async function sendMessage(text) {
     (err) => {
       aiMsg.text = 'Error: ' + (err.message || 'Unknown error')
       streaming.value = false
-      messages.value = [...messages.value]
+      triggerRef(messages)
     }
   )
 }

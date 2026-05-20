@@ -141,7 +141,6 @@ async function saveProfile() {
       userName: form.value.userName,
       userAvatar: auth.user.value?.userAvatar || '',
       userProfile: form.value.userProfile,
-      userRole: auth.user.value?.userRole || 'user',
     })
     // Refresh user data from server
     await auth.fetchCurrentUser()

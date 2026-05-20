@@ -5,6 +5,7 @@
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
 import typescript from 'highlight.js/lib/languages/typescript'
@@ -27,10 +28,6 @@ const container = ref(null)
 
 marked.setOptions({ breaks: true })
 
-function escapeAttr(s) {
-  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
 function escapeHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
@@ -49,7 +46,7 @@ marked.use({
       }
       const langLabel = language ? `<span class="code-lang">${language}</span>` : ''
       const classAttr = language ? ` class="language-${language}"` : ''
-      return `<div class="code-block-wrapper"><div class="code-block-header">${langLabel}<button class="copy-code-btn" data-code="${escapeAttr(text)}">Copy</button></div><pre><code${classAttr}>${highlighted}</code></pre></div>`
+      return `<div class="code-block-wrapper"><div class="code-block-header">${langLabel}<button class="copy-code-btn" data-code="${encodeURIComponent(text)}">Copy</button></div><pre><code${classAttr}>${highlighted}</code></pre></div>`
     }
   }
 })
@@ -60,7 +57,7 @@ let renderRAF = null
 watch(() => props.content, () => {
   if (renderRAF) cancelAnimationFrame(renderRAF)
   renderRAF = requestAnimationFrame(() => {
-    rendered.value = props.content ? marked.parse(props.content) : ''
+    rendered.value = props.content ? DOMPurify.sanitize(marked.parse(props.content)) : ''
   })
 }, { immediate: true })
 
@@ -69,7 +66,7 @@ const copyTimers = new Set()
 function onClick(e) {
   const btn = e.target.closest('.copy-code-btn')
   if (!btn) return
-  const code = decodeHtml(btn.dataset.code || '')
+  const code = decodeURIComponent(btn.dataset.code || '')
   navigator.clipboard.writeText(code).then(() => {
     btn.textContent = 'Copied!'
     btn.classList.add('copied')

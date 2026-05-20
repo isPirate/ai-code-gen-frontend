@@ -11,7 +11,7 @@
       <a href="#docs" class="font-body text-[14px] text-[var(--foreground-secondary)] hover:text-[var(--foreground-primary)] transition-colors">Docs</a>
     </div>
     <div v-if="auth.isAuthenticated.value" class="flex items-center gap-[12px]">
-      <router-link to="/dashboard" class="flex items-center px-[20px] py-[8px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
+      <router-link :to="auth.isAdmin.value ? '/admin' : '/dashboard'" class="flex items-center px-[20px] py-[8px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[14px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors">
         Dashboard
       </router-link>
     </div>

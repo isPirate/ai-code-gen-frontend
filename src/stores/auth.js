@@ -3,12 +3,7 @@ import { api } from '../api/client'
 
 const STORAGE_KEY = 'codepilot_user'
 
-// Restore from localStorage on module init (sync, no API call)
-const cached = (() => {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') } catch { return null }
-})()
-
-const user = ref(cached)
+const user = ref(null)
 const loading = ref(false)
 
 async function login(userAccount, userPassword) {
@@ -55,11 +50,6 @@ async function fetchCurrentUser() {
 
 // Server-side session verification (called once at app boot)
 async function init() {
-  if (cached) {
-    // We have a cached user, mark as authenticated immediately
-    user.value = cached
-  }
-  // Verify with server (non-blocking: if fails, router guard will handle it)
   await fetchCurrentUser()
 }
 
