@@ -99,9 +99,11 @@ import AppSidebar from '../components/AppSidebar.vue'
 import { MonitorDot, Star, Palette, User, Bell, CreditCard } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
 import { api } from '../api/client'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
 const auth = useAuth()
+const toast = useToast()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
@@ -144,8 +146,10 @@ async function saveProfile() {
     })
     // Refresh user data from server
     await auth.fetchCurrentUser()
+    toast.showSuccess('Profile saved')
   } catch (e) {
-    saveError.value = e.message
+    saveError.value = e.message || 'Failed to save profile'
+    toast.showError(e.message || 'Failed to save profile')
   } finally {
     saving.value = false
   }
@@ -171,6 +175,7 @@ async function deleteAccount() {
     await api.deleteUser(userId)
   } catch (e) {
     saveError.value = e.message || '删除账号失败'
+    toast.showError(e.message || 'Failed to delete account')
     showDeleteConfirm.value = false
     return
   }

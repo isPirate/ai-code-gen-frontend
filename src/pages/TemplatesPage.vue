@@ -65,8 +65,10 @@ import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
 import { MonitorDot, Star, Store, ScrollText, Palette, Search } from 'lucide-vue-next'
 import { api } from '../api/client'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
+const toast = useToast()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
@@ -118,6 +120,7 @@ async function fetchApps() {
     apps.value = result.records || []
   } catch (e) {
     error.value = e.message || 'Failed to load apps'
+    toast.showError(e.message || 'Failed to load apps')
     apps.value = []
   } finally {
     loading.value = false

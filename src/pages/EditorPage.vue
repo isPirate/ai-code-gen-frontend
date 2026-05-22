@@ -214,9 +214,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
+import { useToast } from '../composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const appId = ref(route.query.appId || null)
 const app = ref(null)
@@ -396,7 +398,9 @@ async function sendMessage(text) {
         if (updated.codeGenType) {
           previewUrl.value = `/api/static/${updated.codeGenType}_${updated.id}/`
         }
-      } catch {}
+      } catch (e) {
+        toast.showError(e.message || 'Failed to refresh app data')
+      }
     },
     (err) => {
       aiMsg.text = 'Error: ' + (err.message || 'Unknown error')
@@ -416,8 +420,9 @@ async function handleDeploy() {
     sessionStorage.setItem(`deploy_url_${appId.value}`, url)
     const updated = await api.getAppVOById(appId.value)
     app.value = updated
+    toast.showSuccess('Deployed successfully!')
   } catch (e) {
-    console.error('Deploy failed:', e)
+    toast.showError(e.message || 'Deploy failed')
   } finally {
     deploying.value = false
   }

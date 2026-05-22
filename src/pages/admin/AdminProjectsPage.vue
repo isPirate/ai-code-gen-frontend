@@ -209,6 +209,9 @@ import { useRouter } from 'vue-router'
 import AdminSidebar from '../../components/AdminSidebar.vue'
 import { LayoutDashboard, Users, Folder, Settings, Search, User, Tag, X, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool, Eye, Pencil, Star, Image, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api/client'
+import { useToast } from '../../composables/useToast'
+
+const toast = useToast()
 
 const router = useRouter()
 
@@ -348,8 +351,9 @@ async function confirmEdit() {
     showEditModal.value = false
     editTarget.value = null
     await fetchProjects()
+    toast.showSuccess('Project updated')
   } catch (e) {
-    console.error('Edit failed:', e)
+    toast.showError(e.message || 'Failed to update project')
   } finally {
     saving.value = false
   }
@@ -367,8 +371,9 @@ async function toggleFeatured(project) {
       priority: isFeatured ? 0 : 99,
     })
     await fetchProjects()
+    toast.showSuccess(isFeatured ? 'Removed from featured' : 'Added to featured')
   } catch (e) {
-    console.error('Toggle featured failed:', e)
+    toast.showError(e.message || 'Failed to toggle featured')
   }
 }
 
@@ -383,8 +388,9 @@ async function confirmDelete() {
     }
     deleteTarget.value = null
     await fetchProjects()
+    toast.showSuccess('Project deleted')
   } catch (e) {
-    console.error('Delete failed:', e)
+    toast.showError(e.message || 'Failed to delete project')
   } finally {
     deleting.value = false
   }

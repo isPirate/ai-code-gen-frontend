@@ -190,6 +190,9 @@ import { ref, computed, onMounted } from 'vue'
 import AdminSidebar from '../../components/AdminSidebar.vue'
 import { LayoutDashboard, Users, Folder, Settings, Search, SlidersHorizontal, UserPlus, Trash2, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { api } from '../../api/client'
+import { useToast } from '../../composables/useToast'
+
+const toast = useToast()
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -279,6 +282,9 @@ async function handleDeleteUser() {
       currentPage.value--
     }
     fetchUsers()
+    toast.showSuccess('User deleted')
+  } catch (e) {
+    toast.showError(e.message || 'Failed to delete user')
   } finally {
     deleting.value = false
   }
@@ -303,8 +309,9 @@ async function handleAddUser() {
     addForm.value = { userName: '', userAccount: '', userPassword: '', userRole: 'user', userProfile: '' }
     showAddModal.value = false
     fetchUsers()
+    toast.showSuccess('User added')
   } catch (e) {
-    addError.value = e.message
+    addError.value = e.message || 'Failed to add user'
   } finally {
     adding.value = false
   }

@@ -138,9 +138,11 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
 const auth = useAuth()
+const toast = useToast()
 
 onMounted(() => {
   if (auth.isAuthenticated.value) {
@@ -176,7 +178,8 @@ async function handleLogin() {
       router.replace('/dashboard')
     }
   } catch (e) {
-    error.value = e.message
+    error.value = e.message || 'Login failed. Please try again.'
+    toast.showError(e.message || 'Login failed')
   } finally {
     loading.value = false
   }

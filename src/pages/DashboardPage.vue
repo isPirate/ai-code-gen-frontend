@@ -115,8 +115,10 @@ import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
 import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2 } from 'lucide-vue-next'
 import { api } from '../api/client'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
+const toast = useToast()
 
 const navItems = [
   { to: '/dashboard', label: 'Projects', icon: MonitorDot },
@@ -216,8 +218,10 @@ async function confirmRename() {
     showRename.value = false
     renameTarget.value = null
     await fetchProjects()
+    toast.showSuccess('Project renamed')
   } catch (e) {
     error.value = 'Rename failed: ' + (e.message || '')
+    toast.showError(e.message || 'Rename failed')
   } finally {
     renaming.value = false
   }
@@ -236,8 +240,10 @@ async function confirmDelete() {
     showDeleteConfirm.value = false
     deleteTarget.value = null
     await fetchProjects()
+    toast.showSuccess('Project deleted')
   } catch (e) {
     error.value = 'Delete failed: ' + (e.message || '')
+    toast.showError(e.message || 'Delete failed')
   } finally {
     deleting.value = false
   }

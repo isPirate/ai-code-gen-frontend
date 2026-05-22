@@ -177,9 +177,11 @@ import AppFooter from '../components/AppFooter.vue'
 import { Sparkles, Paperclip, Code, ArrowRight, ArrowUp } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
 import { api } from '../api/client'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
 const auth = useAuth()
+const toast = useToast()
 const prompt = ref('')
 const showLoginPrompt = ref(false)
 const generating = ref(false)
@@ -205,6 +207,7 @@ async function handleGenerate() {
     router.push({ path: '/editor', query: { appId } })
   } catch (e) {
     genError.value = e.message || '创建应用失败，请重试'
+    toast.showError(e.message || '创建应用失败，请重试')
   } finally {
     generating.value = false
   }

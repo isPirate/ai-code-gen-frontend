@@ -142,6 +142,9 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { useAuth } from '../stores/auth'
+import { useToast } from '../composables/useToast'
+
+const toast = useToast()
 
 const router = useRouter()
 const auth = useAuth()
@@ -184,7 +187,8 @@ async function handleRegister() {
       router.replace('/dashboard')
     }
   } catch (e) {
-    error.value = e.message
+    error.value = e.message || 'Registration failed. Please try again.'
+    toast.showError(e.message || 'Registration failed')
   } finally {
     loading.value = false
   }
