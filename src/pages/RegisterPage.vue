@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col lg:flex-row w-full min-h-screen overflow-hidden bg-[var(--surface-primary)]">
     <!-- Brand Panel -->
-    <div class="relative flex flex-col justify-between gap-[24px] lg:gap-[32px] w-full lg:w-[560px] h-full p-[32px_24px] lg:p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E84A1A] to-[#A82808] overflow-hidden">
+    <div class="relative flex flex-col justify-between gap-[24px] lg:gap-[32px] w-full lg:w-[560px] min-h-screen p-[32px_24px] lg:p-[60px_48px] bg-gradient-to-br from-[var(--accent-primary)] via-[#E84A1A] to-[#A82808] overflow-hidden">
       <div class="absolute pointer-events-none w-[280px] h-[280px] rounded-full bg-gradient-radial from-white/18 to-transparent" style="top:-60px;right:-20px"></div>
       <div class="absolute pointer-events-none w-[220px] h-[220px] rounded-full bg-gradient-radial from-white/16 to-transparent" style="top:400px;left:-60px"></div>
       <div class="absolute pointer-events-none w-[180px] h-[180px] rounded-full bg-gradient-radial from-white/14 to-transparent" style="top:550px;right:-20px"></div>
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Register Form -->
-    <div class="relative flex items-center justify-center flex-1 h-full p-[32px_24px] lg:p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
+    <div class="relative flex items-center justify-center flex-1 min-h-screen p-[32px_24px] lg:p-[60px_120px] overflow-hidden bg-gradient-to-t from-[#FFF5ED] via-[#FFFBF7] to-white">
       <div class="absolute pointer-events-none w-[280px] h-[280px] rounded-full bg-gradient-radial from-[#FF5C0008] to-transparent" style="top:80px;right:40px"></div>
       <div class="absolute pointer-events-none w-[220px] h-[220px] rounded-full bg-gradient-radial from-[#FF5C0006] to-transparent" style="bottom:100px;left:-30px"></div>
       <div class="absolute pointer-events-none w-[50px] h-[50px] rounded-[12px] bg-[#FF5C0006] -rotate-[20deg]" style="top:420px;right:20px"></div>
