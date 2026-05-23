@@ -3,7 +3,7 @@
     <!-- Toolbar -->
     <div class="flex items-center justify-between h-[56px] px-[16px] bg-white border-b border-[var(--border-subtle)]">
       <div class="flex items-center gap-[8px]">
-        <button @click="$router.back()" class="flex items-center gap-[6px] px-[10px] py-[6px] rounded-[8px] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
+        <button @click="$router.push(route.query.from === 'admin' ? '/admin/projects' : '/dashboard')" class="flex items-center gap-[6px] px-[10px] py-[6px] rounded-[8px] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
           <ArrowLeft :size="18" />
           Back
         </button>
@@ -22,19 +22,21 @@
         </template>
       </div>
       <div class="flex items-center gap-[8px]">
-        <button class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
-          <Download :size="16" />
-          Export
-        </button>
-        <button
-          v-if="appId"
-          @click="handleDeploy"
-          :disabled="deploying"
-          class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[13px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60"
-        >
-          <Rocket :size="16" />
-          {{ deploying ? 'Deploying...' : 'Deploy' }}
-        </button>
+        <template v-if="isOwner">
+          <button class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
+            <Download :size="16" />
+            Export
+          </button>
+          <button
+            v-if="appId"
+            @click="handleDeploy"
+            :disabled="deploying"
+            class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] bg-[var(--accent-primary)] font-body text-[13px] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60"
+          >
+            <Rocket :size="16" />
+            {{ deploying ? 'Deploying...' : 'Deploy' }}
+          </button>
+        </template>
       </div>
     </div>
 
@@ -53,7 +55,15 @@
           </div>
 
           <template v-else>
-            <div v-for="(msg, i) in messages" :key="i" :class="['flex gap-[8px] group', msg.role === 'user' ? 'justify-end' : '']">
+            <!-- Load more history -->
+            <div v-if="hasMoreHistory" class="flex justify-center">
+              <button @click="loadMoreHistory" :disabled="loadingHistory" class="flex items-center gap-[6px] px-[16px] py-[8px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors disabled:opacity-60">
+                <Loader2 v-if="loadingHistory" :size="14" class="animate-spin" />
+                {{ loadingHistory ? 'Loading...' : 'Load more messages' }}
+              </button>
+            </div>
+
+            <div v-for="(msg, i) in messages" :key="msg.id || ('msg-' + i)" :class="['flex gap-[8px] group', msg.role === 'user' ? 'justify-end' : '']">
               <div v-if="msg.role === 'ai'" class="w-[28px] h-[28px] rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
                 <Sparkles :size="14" class="text-white" />
               </div>
@@ -97,7 +107,8 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)]">
+        <!-- Chat Input (owner only) -->
+        <div v-if="isOwner" class="flex items-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)]">
           <input
             v-model="chatInput"
             @keydown.enter="sendMessage"
@@ -112,6 +123,11 @@
           >
             <ArrowUp :size="16" class="text-white" />
           </button>
+        </div>
+        <!-- Read-only indicator (admin viewing other user's project) -->
+        <div v-else class="flex items-center justify-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+          <Lock :size="14" class="text-[var(--foreground-muted)]" />
+          <span class="font-body text-[13px] text-[var(--foreground-muted)]">Read-only — you are viewing another user's project</span>
         </div>
       </div>
 
@@ -209,15 +225,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, triggerRef } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, triggerRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Loader2, Lock, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
+import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuth()
 const toast = useToast()
 
 const appId = ref(route.query.appId || null)
@@ -232,8 +250,14 @@ const previewUrl = ref('')
 const deploying = ref(false)
 
 const copiedIdx = ref(-1)
+const isOwner = computed(() => !app.value || app.value.userId === auth.user.value?.id)
 let copyTimer = null
 let eventSource = null
+
+// Chat history pagination state
+const hasMoreHistory = ref(false)
+const loadingHistory = ref(false)
+const historyCursor = ref(null)
 
 function copyMsg(i) {
   const msg = messages.value[i]
@@ -265,6 +289,60 @@ function scrollToBottom() {
       chatContainer.value.scrollTop = chatContainer.value.scrollHeight
     }
   })
+}
+
+function mapHistoryMessage(record) {
+  return {
+    id: record.id,
+    role: record.messageType === 'user' ? 'user' : 'ai',
+    text: record.message || '',
+    createTime: record.createTime,
+  }
+}
+
+async function loadMoreHistory() {
+  if (loadingHistory.value || !historyCursor.value) return
+  loadingHistory.value = true
+
+  try {
+    const result = await api.listAppChatHistory(appId.value, 10, historyCursor.value)
+    const records = result.records || []
+
+    if (records.length > 0) {
+      // Records come in descending order, reverse to ascending for display
+      const ascendingRecords = [...records].reverse()
+      const newMessages = ascendingRecords.map(mapHistoryMessage)
+
+      // Remember current scroll position
+      const container = chatContainer.value
+      const oldScrollHeight = container?.scrollHeight || 0
+
+      // Prepend older messages
+      messages.value = [...newMessages, ...messages.value]
+
+      // Update cursor to the earliest message's createTime
+      historyCursor.value = ascendingRecords[0].createTime
+
+      // If fewer than requested, no more pages
+      if (records.length < 10) {
+        hasMoreHistory.value = false
+      }
+
+      // Restore scroll position before the browser paints
+      await nextTick()
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight - oldScrollHeight
+        }
+      })
+    } else {
+      hasMoreHistory.value = false
+    }
+  } catch (e) {
+    toast.showError(e.message || 'Failed to load history')
+  } finally {
+    loadingHistory.value = false
+  }
 }
 
 // Resize chat panel
@@ -321,23 +399,57 @@ onMounted(async () => {
       previewUrl.value = `/api/static/${result.codeGenType}_${result.id}/`
     }
 
-    // Restore deploy URL from stored state if app is already deployed
+    // Restore deploy URL from stored state
     if (result.deployKey) {
       const stored = sessionStorage.getItem(`deploy_url_${result.id}`)
-      if (stored) {
-        deployUrl.value = stored
+      if (stored) deployUrl.value = stored
+    }
+
+    // Load chat history (cursor-based, returns descending order)
+    const historyResult = await api.listAppChatHistory(result.id, 10)
+    const historyRecords = historyResult.records || []
+
+    if (historyRecords.length > 0) {
+      // Reverse to ascending order for display
+      const ascendingRecords = [...historyRecords].reverse()
+      messages.value = ascendingRecords.map(mapHistoryMessage)
+
+      // Set cursor for loading older messages
+      historyCursor.value = ascendingRecords[0].createTime
+
+      // If we got a full page, there might be more
+      if (historyRecords.length >= 10) {
+        hasMoreHistory.value = true
       }
     }
 
     loadingApp.value = false
 
-    if (result.initPrompt && !result.codeGenType) {
-      messages.value = [
-        { role: 'user', text: result.initPrompt },
-        { role: 'ai', text: "Ready to generate based on your description. Click the send button or press Enter to start." },
-      ]
-      chatInput.value = result.initPrompt
-    } else {
+    // Scroll to bottom before the browser paints the next frame
+    if (historyRecords.length > 0) {
+      await nextTick()
+      requestAnimationFrame(() => {
+        if (chatContainer.value) {
+          chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+        }
+      })
+    }
+
+    // If >= 2 messages and no preview yet, refresh app to check codeGenType
+    if (historyRecords.length >= 2 && !previewUrl.value) {
+      try {
+        const refreshed = await api.getAppVOById(appId.value)
+        app.value = refreshed
+        if (refreshed.codeGenType) {
+          previewUrl.value = `/api/static/${refreshed.codeGenType}_${refreshed.id}/?_t=${Date.now()}`
+        }
+      } catch {}
+    }
+
+    // Auto-send initPrompt: own app + no chat history + has initPrompt
+    if (messages.value.length === 0 && result.initPrompt && result.userId === auth.user.value?.id) {
+      sendMessage(result.initPrompt)
+    } else if (messages.value.length === 0) {
       messages.value = [
         { role: 'ai', text: "Hi! I'm your AI assistant. Describe the app you want to build, and I'll generate it for you." },
       ]
@@ -396,7 +508,7 @@ async function sendMessage(text) {
         const updated = await api.getAppVOById(appId.value)
         app.value = updated
         if (updated.codeGenType) {
-          previewUrl.value = `/api/static/${updated.codeGenType}_${updated.id}/`
+          previewUrl.value = `/api/static/${updated.codeGenType}_${updated.id}/?_t=${Date.now()}`
         }
       } catch (e) {
         toast.showError(e.message || 'Failed to refresh app data')

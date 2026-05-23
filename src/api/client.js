@@ -1,5 +1,6 @@
 import { userLogin, userRegister, userLogout, getLoginUser, listUserVoByPage, addUser, updateUser, deleteUser, getUserById, getUserVoById } from './generated/codepilot/userController'
 import { addApp, updateApp, deleteApp, getAppVoById, listMyAppVoByPage, listGoodAppVoByPage, deployApp, deleteAppByAdmin, getAppVoByIdByAdmin, listAppVoByPageByAdmin, updateAppByAdmin } from './generated/codepilot/appController'
+import { listAppChatHistory } from './generated/codepilot/chatHistoryController'
 
 export const api = {
   // Auth
@@ -71,6 +72,13 @@ export const api = {
   },
   updateAppByAdmin(data) {
     return updateAppByAdmin(data)
+  },
+
+  // Chat History
+  listAppChatHistory(appId, pageSize = 10, lastCreateTime = null) {
+    const params = { appId, pageSize }
+    if (lastCreateTime) params.lastCreateTime = lastCreateTime
+    return listAppChatHistory(params)
   },
 
   // SSE chat for code generation

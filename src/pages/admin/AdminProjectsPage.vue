@@ -325,7 +325,7 @@ function goPage(p) {
 }
 
 function viewProject(project) {
-  router.push({ path: '/editor', query: { appId: project.id } })
+  router.push({ path: '/editor', query: { appId: project.id, from: 'admin' } })
 }
 
 function openEdit(project) {
