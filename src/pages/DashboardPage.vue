@@ -59,7 +59,7 @@
               </div>
               <p class="font-body text-[13px] text-[var(--foreground-secondary)] line-clamp-2">{{ project.initPrompt || 'No description' }}</p>
               <div class="flex items-center gap-[8px] mt-[4px]">
-                <span class="px-[8px] py-[2px] rounded-[6px] bg-[var(--surface-secondary)] font-caption text-[11px] text-[var(--foreground-muted)]">{{ project.codeGenType || 'Custom' }}</span>
+                <span class="px-[8px] py-[2px] rounded-[6px] bg-[var(--surface-secondary)] font-caption text-[11px] text-[var(--foreground-muted)]">{{ getCodeGenTypeLabel(project.codeGenType) || 'Custom' }}</span>
                 <span class="font-caption text-[11px] text-[var(--foreground-muted)]">{{ formatTime(project.updateTime || project.createTime) }}</span>
                 <span v-if="project.deployKey" class="ml-auto px-[8px] py-[2px] rounded-[6px] bg-green-50 font-caption text-[11px] text-green-700">Deployed</span>
               </div>
@@ -113,8 +113,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
-import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2 } from 'lucide-vue-next'
+import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2, Code2 } from 'lucide-vue-next'
 import { api } from '../api/client'
+import { getCodeGenTypeLabel } from '../api/codeGenType'
 import { useToast } from '../composables/useToast'
 
 const router = useRouter()
@@ -147,6 +148,7 @@ const iconMap = {
   'ecommerce': Store,
   'blog': ScrollText,
   'portfolio': Palette,
+  'vue_project': Code2,
 }
 
 const gradients = [

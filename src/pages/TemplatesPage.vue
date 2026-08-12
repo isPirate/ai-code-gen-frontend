@@ -42,7 +42,7 @@
             <div class="flex flex-col gap-[6px] p-[16px_20px]">
               <div class="flex items-center justify-between">
                 <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">{{ app.appName || 'Untitled' }}</h3>
-                <span class="font-caption text-[12px] text-[var(--foreground-muted)]">{{ app.codeGenType || 'App' }}</span>
+                <span class="font-caption text-[12px] text-[var(--foreground-muted)]">{{ getCodeGenTypeLabel(app.codeGenType) || 'App' }}</span>
               </div>
               <p class="font-body text-[13px] text-[var(--foreground-secondary)] line-clamp-2">{{ app.initPrompt || 'No description' }}</p>
               <div class="flex items-center justify-between mt-[4px]">
@@ -63,8 +63,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
-import { MonitorDot, Star, Store, ScrollText, Palette, Search } from 'lucide-vue-next'
+import { MonitorDot, Star, Store, ScrollText, Palette, Search, Code2 } from 'lucide-vue-next'
 import { api } from '../api/client'
+import { getCodeGenTypeLabel } from '../api/codeGenType'
 import { useToast } from '../composables/useToast'
 
 const router = useRouter()
@@ -87,6 +88,7 @@ const iconMap = {
   'ecommerce': Store,
   'blog': ScrollText,
   'portfolio': Palette,
+  'vue_project': Code2,
 }
 
 const gradients = [

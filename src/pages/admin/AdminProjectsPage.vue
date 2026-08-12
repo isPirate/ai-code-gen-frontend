@@ -20,8 +20,7 @@
               <Tag :size="13" class="text-[var(--foreground-muted)] flex-shrink-0" />
               <select v-model="filterType" @change="onFilterChange" class="flex-1 font-body text-[12px] text-[var(--foreground-primary)] outline-none bg-transparent cursor-pointer">
                 <option value="">All types</option>
-                <option value="html">HTML</option>
-                <option value="multi_file">Multi File</option>
+                <option v-for="t in CODE_GEN_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
               </select>
             </div>
             <button v-if="hasFilters" @click="clearFilters" class="flex-shrink-0 w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[var(--surface-secondary)] transition-colors" title="Clear filters">
@@ -209,6 +208,7 @@ import { useRouter } from 'vue-router'
 import AdminSidebar from '../../components/AdminSidebar.vue'
 import { LayoutDashboard, Users, Folder, Settings, Search, User, Tag, X, ChevronLeft, ChevronRight, LayoutDashboardIcon, ShoppingCart, BarChart3, PenTool, Eye, Pencil, Star, Image, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api/client'
+import { CODE_GEN_TYPES, getCodeGenTypeLabel } from '../../api/codeGenType'
 import { useToast } from '../../composables/useToast'
 
 const toast = useToast()
@@ -263,8 +263,7 @@ function statusBg(project) {
   return project.deployKey ? '#E8F5E9' : '#FFF3E0'
 }
 
-const TYPE_LABELS = { html: 'HTML', multi_file: 'Multi File' }
-function typeLabel(v) { return TYPE_LABELS[v] || v || '-' }
+function typeLabel(v) { return getCodeGenTypeLabel(v) || v || '-' }
 
 function formatDate(d) {
   if (!d) return ''

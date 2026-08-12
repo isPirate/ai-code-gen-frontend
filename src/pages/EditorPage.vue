@@ -230,6 +230,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Loader2, Lock, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
+import { buildPreviewPath } from '../api/codeGenType'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 
@@ -396,7 +397,7 @@ onMounted(async () => {
     appId.value = result.id
 
     if (result.codeGenType) {
-      previewUrl.value = `/api/static/${result.codeGenType}_${result.id}/`
+      previewUrl.value = buildPreviewPath(result.codeGenType, result.id)
     }
 
     // Restore deploy URL from stored state
@@ -441,7 +442,7 @@ onMounted(async () => {
         const refreshed = await api.getAppVOById(appId.value)
         app.value = refreshed
         if (refreshed.codeGenType) {
-          previewUrl.value = `/api/static/${refreshed.codeGenType}_${refreshed.id}/?_t=${Date.now()}`
+          previewUrl.value = `${buildPreviewPath(refreshed.codeGenType, refreshed.id)}?_t=${Date.now()}`
         }
       } catch {}
     }
@@ -508,7 +509,7 @@ async function sendMessage(text) {
         const updated = await api.getAppVOById(appId.value)
         app.value = updated
         if (updated.codeGenType) {
-          previewUrl.value = `/api/static/${updated.codeGenType}_${updated.id}/?_t=${Date.now()}`
+          previewUrl.value = `${buildPreviewPath(updated.codeGenType, updated.id)}?_t=${Date.now()}`
         }
       } catch (e) {
         toast.showError(e.message || 'Failed to refresh app data')
