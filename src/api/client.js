@@ -82,7 +82,7 @@ export const api = {
   },
 
   // SSE chat for code generation
-  sseChatToGenCode(appId, message, onChunk, onDone, onError) {
+  sseChatToGenCode(appId, message, onChunk, onDone, onError, onThinking) {
     const params = new URLSearchParams({ appId: String(appId), message })
     const url = `/api/app/chat/gen/code?${params}`
 
@@ -99,6 +99,18 @@ export const api = {
         // skip non-JSON data
       }
     }
+
+    // 深度思考流走自定义 thinking 事件（命名事件不会触发 onmessage）
+    es.addEventListener('thinking', (event) => {
+      try {
+        const parsed = JSON.parse(event.data)
+        if (parsed.d !== undefined && onThinking) {
+          onThinking(parsed.d)
+        }
+      } catch {
+        // skip non-JSON data
+      }
+    })
 
     es.addEventListener('done', () => {
       closed = true

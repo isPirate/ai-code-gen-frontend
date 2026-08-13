@@ -81,6 +81,31 @@
                 v-else
                 class="relative rounded-[12px] p-[14px_18px] bg-[var(--surface-secondary)] text-[var(--foreground-primary)] rounded-tl-[4px] flex-1 min-w-0"
               >
+                <!-- Deep reasoning panel (thinking stream) -->
+                <div v-if="msg.thinking" class="rounded-[10px] border border-[var(--border-subtle)] bg-white/60 overflow-hidden mb-[10px]">
+                  <button
+                    @click="msg.thinkingOpen = !msg.thinkingOpen"
+                    class="w-full flex items-center gap-[6px] px-[10px] py-[8px] hover:bg-[var(--surface-secondary)] transition-colors"
+                    :aria-expanded="msg.thinkingOpen"
+                    :aria-controls="'thinking-' + i"
+                  >
+                    <Loader2 v-if="streaming && i === messages.length - 1" :size="12" class="animate-spin text-[var(--accent-primary)] flex-shrink-0" />
+                    <Brain v-else :size="14" class="text-[var(--accent-primary)] flex-shrink-0" />
+                    <span class="font-caption text-[11px] uppercase tracking-wide text-[var(--foreground-secondary)] flex-shrink-0">
+                      {{ streaming && i === messages.length - 1 ? 'Thinking...' : 'Deep Reasoning' }}
+                    </span>
+                    <span v-if="!msg.thinkingOpen" class="truncate font-body text-[11px] text-[var(--foreground-muted)]">{{ msg.thinking }}</span>
+                    <ChevronDown :size="14" class="ml-auto flex-shrink-0 text-[var(--foreground-muted)] transition-transform duration-200" :class="msg.thinkingOpen ? 'rotate-180' : ''" />
+                  </button>
+                  <div
+                    :id="'thinking-' + i"
+                    v-show="msg.thinkingOpen"
+                    :ref="(el) => { if (i === messages.length - 1) thinkingPanelEl = el }"
+                    class="max-h-[240px] overflow-y-auto px-[12px] pb-[10px] overscroll-contain"
+                  >
+                    <p class="whitespace-pre-wrap break-words font-body text-[12px] leading-relaxed text-[var(--foreground-secondary)]">{{ msg.thinking }}</p>
+                  </div>
+                </div>
                 <MarkdownRenderer :content="msg.text" />
                 <div class="absolute top-[6px] right-[8px] flex items-center gap-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
                   <span v-if="copiedIdx === i" class="font-caption text-[11px] text-green-600">Copied!</span>
@@ -163,18 +188,26 @@
             </div>
           </div>
 
-          <iframe
-            v-else-if="previewUrl"
-            :src="previewUrl"
-            class="w-full h-full border-0"
-          ></iframe>
-
           <div v-else-if="streaming" class="flex items-center justify-center h-full">
             <div class="text-center">
               <Sparkles :size="24" class="text-[var(--accent-primary)] mx-auto mb-[12px] animate-pulse" />
               <span class="font-body text-[14px] text-[var(--foreground-muted)]">Generating preview...</span>
             </div>
           </div>
+
+          <!-- Vue 项目为异步构建，等待 dist 生成 -->
+          <div v-else-if="previewPolling" class="flex items-center justify-center h-full">
+            <div class="text-center">
+              <Loader2 :size="24" class="text-[var(--accent-primary)] mx-auto mb-[12px] animate-spin" />
+              <span class="font-body text-[14px] text-[var(--foreground-muted)]">Building preview...</span>
+            </div>
+          </div>
+
+          <iframe
+            v-else-if="previewUrl"
+            :src="previewUrl"
+            class="w-full h-full border-0"
+          ></iframe>
 
           <div v-else class="flex items-center justify-center h-full p-[24px]">
             <div class="w-full max-w-[700px] bg-white rounded-[12px] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
@@ -227,10 +260,10 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, triggerRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Check, ChevronDown, Copy, Download, ExternalLink, Loader2, Lock, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import { ArrowLeft, Brain, Check, ChevronDown, Copy, Download, ExternalLink, Loader2, Lock, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
-import { buildPreviewPath } from '../api/codeGenType'
+import { buildPreviewPath, buildDeployUrl, CodeGenType } from '../api/codeGenType'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 
@@ -273,6 +306,84 @@ const showDeployResult = ref(false)
 
 // Smart scroll: only auto-scroll when user is near the bottom
 const nearBottom = ref(true)
+// Current streaming message's thinking panel element (keeps it scrolled to bottom)
+const thinkingPanelEl = ref(null)
+
+// —— Vue 预览：后端在 SSE 流结束后异步构建（npm install + build），需轮询等待 dist 资源可用 ——
+// 机制：每次对话结束才启动轮询窗口（无对话时零请求）；探测响应以 ETag 做标记（无响应头时
+// 降级为 index.html 内容指纹），标记变化即刷新预览；变化后连续 2 次稳定视为构建完成，停止轮询。
+const previewPolling = ref(false)
+let previewPollSeq = 0
+let previewPollTimer = null
+let previewMark = null
+let previewStableCount = 0
+let previewChanged = false
+
+function stopPreviewPolling() {
+  previewPollSeq++
+  clearTimeout(previewPollTimer)
+  previewPollTimer = null
+}
+
+async function pollVuePreview(appId, seq, attempts) {
+  const base = buildPreviewPath(CodeGenType.VUE_PROJECT, appId)
+  try {
+    const res = await fetch(base, { cache: 'no-store' })
+    if (seq !== previewPollSeq) return
+    if (res.ok) {
+      // 优先用后端返回的 ETag / Last-Modified 做标记（零响应体开销）；缺失时降级内容指纹
+      let mark = res.headers.get('etag') || res.headers.get('last-modified')
+      if (!mark) {
+        mark = await res.text()
+        if (seq !== previewPollSeq) return
+      }
+      if (!previewUrl.value) {
+        previewMark = mark
+        previewUrl.value = `${base}?_t=${Date.now()}`
+        previewPolling.value = false
+        previewChanged = true
+        previewStableCount = 0
+      } else if (mark !== previewMark) {
+        previewMark = mark
+        previewUrl.value = `${base}?_t=${Date.now()}`
+        previewPolling.value = false
+        previewChanged = true
+        previewStableCount = 0
+      }
+      // 标记变化过才计稳定数；二次对话时旧标记不变则一直等待新构建
+      if (previewChanged) previewStableCount++
+    }
+  } catch {
+    // 网络异常，继续轮询
+  }
+  if (seq !== previewPollSeq) return
+  // 内容已刷新且连续 2 次稳定（构建完成），或超时 5 分钟（100 次 × 3s）→ 停止
+  if ((previewChanged && previewStableCount >= 2) || attempts >= 100) {
+    previewPolling.value = false
+    return
+  }
+  previewPollTimer = setTimeout(() => pollVuePreview(appId, seq, attempts + 1), 3000)
+}
+
+function startVuePreviewPoll(appId) {
+  stopPreviewPolling()
+  previewStableCount = 0
+  previewChanged = false
+  const seq = ++previewPollSeq
+  // 等待新构建期间显示 Building 状态（二次对话时覆盖旧预览，让用户感知构建中）
+  previewPolling.value = true
+  pollVuePreview(appId, seq, 0)
+}
+
+function updatePreview(codeGenType, appId) {
+  if (codeGenType === CodeGenType.VUE_PROJECT) {
+    startVuePreviewPoll(appId)
+  } else {
+    stopPreviewPolling()
+    previewPolling.value = false
+    previewUrl.value = `${buildPreviewPath(codeGenType, appId)}?_t=${Date.now()}`
+  }
+}
 
 function isNearBottom() {
   const el = chatContainer.value
@@ -375,6 +486,7 @@ function onResizeEnd() {
 
 onUnmounted(() => {
   clearTimeout(copyTimer)
+  stopPreviewPolling()
   if (eventSource) { eventSource.close(); eventSource = null }
   document.body.style.userSelect = ''
   document.body.style.cursor = ''
@@ -397,13 +509,13 @@ onMounted(async () => {
     appId.value = result.id
 
     if (result.codeGenType) {
-      previewUrl.value = buildPreviewPath(result.codeGenType, result.id)
+      updatePreview(result.codeGenType, result.id)
     }
 
-    // Restore deploy URL from stored state
+    // Restore deploy URL: sessionStorage 优先，缺失时用 deployKey 推导（后端 URL = host/deployKey/）
     if (result.deployKey) {
       const stored = sessionStorage.getItem(`deploy_url_${result.id}`)
-      if (stored) deployUrl.value = stored
+      deployUrl.value = stored || buildDeployUrl(result.deployKey)
     }
 
     // Load chat history (cursor-based, returns descending order)
@@ -442,7 +554,7 @@ onMounted(async () => {
         const refreshed = await api.getAppVOById(appId.value)
         app.value = refreshed
         if (refreshed.codeGenType) {
-          previewUrl.value = `${buildPreviewPath(refreshed.codeGenType, refreshed.id)}?_t=${Date.now()}`
+          updatePreview(refreshed.codeGenType, refreshed.id)
         }
       } catch {}
     }
@@ -491,7 +603,7 @@ async function sendMessage(text) {
 
   streaming.value = true
   nearBottom.value = true
-  const aiMsg = { role: 'ai', text: '' }
+  const aiMsg = { role: 'ai', text: '', thinking: '', thinkingOpen: true }
   messages.value = [...messages.value, aiMsg]
   scrollToBottom()
 
@@ -505,11 +617,14 @@ async function sendMessage(text) {
     },
     async () => {
       streaming.value = false
+      // 思考完成默认收起；错误文本（Error / 系统提示）时保持展开便于排查
+      aiMsg.thinkingOpen = !(aiMsg.text.startsWith('Error') || aiMsg.text.startsWith('[系统提示]'))
+      triggerRef(messages)
       try {
         const updated = await api.getAppVOById(appId.value)
         app.value = updated
         if (updated.codeGenType) {
-          previewUrl.value = `${buildPreviewPath(updated.codeGenType, updated.id)}?_t=${Date.now()}`
+          updatePreview(updated.codeGenType, updated.id)
         }
       } catch (e) {
         toast.showError(e.message || 'Failed to refresh app data')
@@ -519,6 +634,18 @@ async function sendMessage(text) {
       aiMsg.text = 'Error: ' + (err.message || 'Unknown error')
       streaming.value = false
       triggerRef(messages)
+    },
+    (chunk) => {
+      aiMsg.thinking += chunk
+      triggerRef(messages)
+      if (nearBottom.value) {
+        scrollToBottom()
+        nextTick(() => {
+          if (thinkingPanelEl.value) {
+            thinkingPanelEl.value.scrollTop = thinkingPanelEl.value.scrollHeight
+          }
+        })
+      }
     }
   )
 }

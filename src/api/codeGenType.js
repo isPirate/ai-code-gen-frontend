@@ -22,3 +22,11 @@ export function buildPreviewPath(codeGenType, id) {
   const suffix = meta?.previewDist ? '/dist' : ''
   return `/api/static/${codeGenType}_${id}${suffix}/`
 }
+
+// 部署 URL 基础域名（与后端 AppConstant.CODE_DEPLOY_HOST 保持一致）
+export const DEPLOY_HOST = 'http://localhost'
+
+// 部署 URL = 域名 + 6 位 deployKey（后端 AppServiceImpl.deployApp 返回格式 %s/%s/）
+export function buildDeployUrl(deployKey) {
+  return `${DEPLOY_HOST}/${deployKey}/`
+}
