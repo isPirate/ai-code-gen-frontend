@@ -35,42 +35,52 @@
         </div>
 
         <!-- Projects Grid -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] lg:gap-[20px] w-full">
-          <div
-            v-for="project in projects"
-            :key="project.id"
-            @click="openProject(project)"
-            class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_#00000006] hover:shadow-[0_4px_16px_#0000000A] transition-shadow cursor-pointer group"
-          >
-            <div class="flex items-center justify-center h-[160px]" :style="{ background: projectGradient(project) }">
-              <component :is="projectIcon(project)" :size="48" class="text-white/40" />
-            </div>
-            <div class="flex flex-col gap-[6px] p-[16px_20px]">
-              <div class="flex items-center justify-between">
-                <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">{{ project.appName || 'Untitled' }}</h3>
-                <div class="flex gap-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button @click.stop="handleRename(project)" class="p-[4px] rounded-[4px] hover:bg-[var(--surface-secondary)] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]" title="Rename">
-                    <Pencil :size="14" />
-                  </button>
-                  <button @click.stop="handleDelete(project)" class="p-[4px] rounded-[4px] hover:bg-red-50 text-[var(--foreground-muted)] hover:text-red-500" title="Delete">
-                    <Trash2 :size="14" />
-                  </button>
+        <div v-else>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] lg:gap-[20px] w-full">
+            <div
+              v-for="project in projects"
+              :key="project.id"
+              @click="openProject(project)"
+              class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_#00000006] hover:shadow-[0_4px_16px_#0000000A] transition-shadow cursor-pointer group"
+            >
+              <div class="flex items-center justify-center h-[160px]" :style="{ background: projectGradient(project) }">
+                <component :is="projectIcon(project)" :size="48" class="text-white/40" />
+              </div>
+              <div class="flex flex-col gap-[6px] p-[16px_20px]">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-body text-[15px] font-semibold text-[var(--foreground-primary)]">{{ project.appName || 'Untitled' }}</h3>
+                  <div class="flex gap-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button @click.stop="handleRename(project)" class="p-[4px] rounded-[4px] hover:bg-[var(--surface-secondary)] text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)]" title="Rename">
+                      <Pencil :size="14" />
+                    </button>
+                    <button @click.stop="handleDelete(project)" class="p-[4px] rounded-[4px] hover:bg-red-50 text-[var(--foreground-muted)] hover:text-red-500" title="Delete">
+                      <Trash2 :size="14" />
+                    </button>
+                  </div>
+                </div>
+                <p class="font-body text-[13px] text-[var(--foreground-secondary)] line-clamp-2">{{ project.initPrompt || 'No description' }}</p>
+                <div class="flex items-center gap-[8px] mt-[4px]">
+                  <span class="px-[8px] py-[2px] rounded-[6px] bg-[var(--surface-secondary)] font-caption text-[11px] text-[var(--foreground-muted)]">{{ getCodeGenTypeLabel(project.codeGenType) || 'Custom' }}</span>
+                  <span class="font-caption text-[11px] text-[var(--foreground-muted)]">{{ formatTime(project.updateTime || project.createTime) }}</span>
+                  <span v-if="project.deployKey" class="ml-auto px-[8px] py-[2px] rounded-[6px] bg-green-50 font-caption text-[11px] text-green-700">Deployed</span>
                 </div>
               </div>
-              <p class="font-body text-[13px] text-[var(--foreground-secondary)] line-clamp-2">{{ project.initPrompt || 'No description' }}</p>
-              <div class="flex items-center gap-[8px] mt-[4px]">
-                <span class="px-[8px] py-[2px] rounded-[6px] bg-[var(--surface-secondary)] font-caption text-[11px] text-[var(--foreground-muted)]">{{ getCodeGenTypeLabel(project.codeGenType) || 'Custom' }}</span>
-                <span class="font-caption text-[11px] text-[var(--foreground-muted)]">{{ formatTime(project.updateTime || project.createTime) }}</span>
-                <span v-if="project.deployKey" class="ml-auto px-[8px] py-[2px] rounded-[6px] bg-green-50 font-caption text-[11px] text-green-700">Deployed</span>
-              </div>
             </div>
+
+            <!-- Create New Card -->
+            <button @click="handleNewProject" class="flex flex-col items-center justify-center gap-[12px] h-full min-h-[280px] rounded-[12px] border border-dashed border-[var(--border-subtle)] hover:border-[var(--accent-primary)] hover:bg-[var(--surface-primary)] transition-colors">
+              <Plus :size="32" class="text-[var(--foreground-muted)]" />
+              <span class="font-body text-[14px] text-[var(--foreground-muted)]">Create New Project</span>
+            </button>
           </div>
 
-          <!-- Create New Card -->
-          <button @click="handleNewProject" class="flex flex-col items-center justify-center gap-[12px] h-full min-h-[280px] rounded-[12px] border border-dashed border-[var(--border-subtle)] hover:border-[var(--accent-primary)] hover:bg-[var(--surface-primary)] transition-colors">
-            <Plus :size="32" class="text-[var(--foreground-muted)]" />
-            <span class="font-body text-[14px] text-[var(--foreground-muted)]">Create New Project</span>
-          </button>
+          <!-- Load more (后端每页最多 20 条) -->
+          <div v-if="hasMore" class="flex justify-center mt-[24px]">
+            <button @click="loadMoreProjects" :disabled="loadingMore" class="flex items-center gap-[6px] px-[20px] py-[9px] rounded-[8px] border border-[var(--border-subtle)] bg-white font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors disabled:opacity-60">
+              <Loader2 v-if="loadingMore" :size="14" class="animate-spin" />
+              {{ loadingMore ? 'Loading...' : 'Load more projects' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -113,7 +123,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '../components/AppSidebar.vue'
-import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2, Code2 } from 'lucide-vue-next'
+import { Search, Plus, MonitorDot, Star, Store, ScrollText, Palette, Pencil, Trash2, Code2, Loader2 } from 'lucide-vue-next'
 import { api } from '../api/client'
 import { getCodeGenTypeLabel } from '../api/codeGenType'
 import { useToast } from '../composables/useToast'
@@ -131,6 +141,12 @@ const search = ref('')
 const projects = ref([])
 const loading = ref(false)
 const error = ref('')
+
+// 分页：后端每页最多 20 条，用 totalRow 判断是否还有更多
+const PAGE_SIZE = 20
+const pageNum = ref(1)
+const hasMore = ref(false)
+const loadingMore = ref(false)
 
 const showRename = ref(false)
 const renameTarget = ref(null)
@@ -178,18 +194,45 @@ function formatTime(t) {
 async function fetchProjects() {
   loading.value = true
   error.value = ''
+  pageNum.value = 1
   try {
-    const params = { pageSize: 20 }
+    const params = { pageNum: pageNum.value, pageSize: PAGE_SIZE }
     if (search.value.trim()) {
       params.appName = search.value.trim()
     }
     const result = await api.listMyAppVOPage(params)
     projects.value = result.records || []
+    hasMore.value = (result.totalRow || 0) > projects.value.length
   } catch (e) {
     error.value = e.message || 'Failed to load projects'
     projects.value = []
+    hasMore.value = false
   } finally {
     loading.value = false
+  }
+}
+
+async function loadMoreProjects() {
+  if (loadingMore.value || !hasMore.value) return
+  loadingMore.value = true
+  try {
+    const params = { pageNum: pageNum.value + 1, pageSize: PAGE_SIZE }
+    if (search.value.trim()) {
+      params.appName = search.value.trim()
+    }
+    const result = await api.listMyAppVOPage(params)
+    const records = result.records || []
+    if (records.length > 0) {
+      pageNum.value += 1
+      projects.value = [...projects.value, ...records]
+      hasMore.value = (result.totalRow || 0) > projects.value.length
+    } else {
+      hasMore.value = false
+    }
+  } catch (e) {
+    toast.showError(e.message || 'Failed to load more projects')
+  } finally {
+    loadingMore.value = false
   }
 }
 
