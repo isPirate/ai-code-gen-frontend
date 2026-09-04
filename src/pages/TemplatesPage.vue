@@ -36,7 +36,8 @@
             :key="app.id"
             class="flex flex-col bg-white rounded-[12px] border border-[var(--border-subtle)] overflow-hidden shadow-[0_2px_8px_#00000006] hover:shadow-[0_4px_16px_#0000000A] transition-shadow cursor-pointer"
           >
-            <div class="flex items-center justify-center h-[140px]" :style="{ background: projectGradient(app) }">
+            <img v-if="app.cover" :src="app.cover" :alt="app.appName || 'cover'" class="w-full h-[140px] object-cover" />
+            <div v-else class="flex items-center justify-center h-[140px]" :style="{ background: projectGradient(app) }">
               <component :is="projectIcon(app)" :size="40" class="text-white/40" />
             </div>
             <div class="flex flex-col gap-[6px] p-[16px_20px]">
