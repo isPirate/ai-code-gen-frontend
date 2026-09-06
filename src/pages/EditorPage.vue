@@ -23,9 +23,15 @@
       </div>
       <div class="flex items-center gap-[8px]">
         <template v-if="isOwner">
-          <button class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors">
-            <Download :size="16" />
-            Export
+          <button
+            v-if="appId"
+            @click="handleDownloadCode"
+            :disabled="downloading"
+            class="flex items-center gap-[6px] px-[12px] py-[7px] rounded-[8px] border border-[var(--border-subtle)] font-body text-[13px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)] transition-colors disabled:opacity-60"
+          >
+            <Loader2 v-if="downloading" :size="16" class="animate-spin" />
+            <Download v-else :size="16" />
+            {{ downloading ? 'Downloading...' : 'Download Code' }}
           </button>
           <button
             v-if="appId"
@@ -282,6 +288,7 @@ const messages = ref([])
 const streaming = ref(false)
 const previewUrl = ref('')
 const deploying = ref(false)
+const downloading = ref(false)
 
 const copiedIdx = ref(-1)
 const isOwner = computed(() => !app.value || app.value.userId === auth.user.value?.id)
@@ -665,6 +672,19 @@ async function handleDeploy() {
     toast.showError(e.message || 'Deploy failed')
   } finally {
     deploying.value = false
+  }
+}
+
+async function handleDownloadCode() {
+  if (!appId.value || downloading.value) return
+  downloading.value = true
+  try {
+    const fileName = await api.downloadAppCode(appId.value, app.value?.appName || `app_${appId.value}`)
+    toast.showSuccess(`Downloaded ${fileName}`)
+  } catch (e) {
+    toast.showError(e.message || 'Download failed')
+  } finally {
+    downloading.value = false
   }
 }
 </script>

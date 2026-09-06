@@ -99,6 +99,7 @@ npm run openapi2ts   # 重新生成 src/api/generated/
 | POST /app/good/list/page/vo | TemplatesPage(Featured) |
 | GET /app/chat/gen/code | EditorPage (SSE EventSource) |
 | POST /app/deploy | EditorPage |
+| GET /app/download/{appId} | EditorPage (二进制 ZIP 响应，client.js 直接 fetch 解析 Content-Disposition) |
 | POST /app/admin/list/page/vo | AdminProjectsPage |
 | POST /app/admin/update | AdminProjectsPage |
 | POST /app/admin/delete | AdminProjectsPage |
