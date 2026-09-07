@@ -139,21 +139,56 @@
         </div>
 
         <!-- Chat Input (owner only) -->
-        <div v-if="isOwner" class="flex items-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)]">
-          <input
-            v-model="chatInput"
-            @keydown.enter="sendMessage"
-            :disabled="streaming"
-            placeholder="Describe changes..."
-            class="flex-1 font-body text-[13px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent disabled:opacity-40"
-          />
-          <button
-            @click="sendMessage"
-            :disabled="streaming || !chatInput.trim()"
-            class="w-[32px] h-[32px] rounded-[8px] bg-[var(--accent-primary)] flex items-center justify-center hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40"
-          >
-            <ArrowUp :size="16" class="text-white" />
-          </button>
+        <div v-if="isOwner" class="border-t border-[var(--border-subtle)]">
+          <!-- Visual edit: selected elements -->
+          <div v-if="selectedElements.length || editMode" class="flex flex-wrap items-center gap-[6px] px-[16px] pt-[12px]">
+            <div
+              v-for="el in selectedElements"
+              :key="el.selId"
+              class="flex items-center gap-[6px] max-w-full px-[8px] py-[4px] rounded-[6px] bg-[#FFF5EE] border border-[var(--accent-primary)]"
+            >
+              <span class="truncate font-caption text-[11px] text-[var(--accent-primary)]">
+                &lt;{{ el.tag }}{{ el.domId ? '#' + el.domId : (el.classes.length ? '.' + el.classes[0] : '') }}&gt; {{ el.text }}
+              </span>
+              <button
+                @click="removeSelected(el.selId)"
+                class="w-[16px] h-[16px] rounded-[4px] flex items-center justify-center flex-shrink-0 text-[var(--foreground-muted)] hover:text-[var(--foreground-primary)] hover:bg-[#0000000D] transition-colors"
+                title="Remove"
+              >
+                <X :size="12" />
+              </button>
+            </div>
+            <span v-if="editMode && !selectedElements.length" class="font-body text-[12px] text-[var(--foreground-muted)]">
+              Click an element in the preview to select it
+            </span>
+          </div>
+          <div class="flex items-center gap-[8px] px-[16px] py-[12px]">
+            <input
+              v-model="chatInput"
+              @keydown.enter="sendMessage"
+              :disabled="streaming"
+              placeholder="Describe changes..."
+              class="flex-1 font-body text-[13px] text-[var(--foreground-primary)] placeholder-[var(--foreground-muted)] outline-none bg-transparent disabled:opacity-40"
+            />
+            <button
+              @click="toggleEditMode"
+              :disabled="streaming || !previewUrl"
+              :title="editMode ? 'Exit visual edit mode' : 'Select elements in the preview to edit'"
+              class="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center transition-colors disabled:opacity-40"
+              :class="editMode
+                ? 'bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-hover)]'
+                : 'border border-[var(--border-subtle)] text-[var(--foreground-secondary)] hover:bg-[var(--surface-secondary)]'"
+            >
+              <SquareDashedMousePointer :size="16" />
+            </button>
+            <button
+              @click="sendMessage"
+              :disabled="streaming || !chatInput.trim()"
+              class="w-[32px] h-[32px] rounded-[8px] bg-[var(--accent-primary)] flex items-center justify-center hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40"
+            >
+              <ArrowUp :size="16" class="text-white" />
+            </button>
+          </div>
         </div>
         <!-- Read-only indicator (admin viewing other user's project) -->
         <div v-else class="flex items-center justify-center gap-[8px] p-[12px_16px] border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
@@ -211,7 +246,9 @@
 
           <iframe
             v-else-if="previewUrl"
+            ref="previewFrame"
             :src="previewUrl"
+            @load="onPreviewFrameLoad"
             class="w-full h-full border-0"
           ></iframe>
 
@@ -266,12 +303,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, triggerRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Brain, Check, ChevronDown, Copy, Download, ExternalLink, Loader2, Lock, Rocket, Sparkles, ArrowUp } from 'lucide-vue-next'
+import { ArrowLeft, Brain, Check, ChevronDown, Copy, Download, ExternalLink, Loader2, Lock, Rocket, Sparkles, ArrowUp, SquareDashedMousePointer, X } from 'lucide-vue-next'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { api } from '../api/client'
 import { buildPreviewPath, buildDeployUrl, CodeGenType } from '../api/codeGenType'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
+import { useVisualEdit } from '../composables/useVisualEdit'
 
 const route = useRoute()
 const router = useRouter()
@@ -295,6 +333,15 @@ const isOwner = computed(() => !app.value || app.value.userId === auth.user.valu
 let copyTimer = null
 let eventSource = null
 
+// Visual edit: pick elements in the preview iframe and attach them to the next prompt
+const previewFrame = ref(null)
+const { editMode, selectedElements, toggleEditMode, removeSelected, attach: attachVisualEdit, reset: resetVisualEdit, buildSelectionContext } = useVisualEdit(previewFrame)
+
+// iframe 重新加载（预览刷新/构建完成）会丢失注入的监听，编辑模式开启时需重新注入
+function onPreviewFrameLoad() {
+  if (editMode.value) attachVisualEdit()
+}
+
 // Chat history pagination state
 const hasMoreHistory = ref(false)
 const loadingHistory = ref(false)
@@ -317,8 +364,12 @@ const nearBottom = ref(true)
 const thinkingPanelEl = ref(null)
 
 // —— Vue 预览：后端在 SSE 流结束后异步构建（npm install + build），需轮询等待 dist 资源可用 ——
-// 机制：每次对话结束才启动轮询窗口（无对话时零请求）；探测响应以 ETag 做标记（无响应头时
-// 降级为 index.html 内容指纹），标记变化即刷新预览；变化后连续 2 次稳定视为构建完成，停止轮询。
+// 两种轮询模式：
+//   初始加载（waitForNew=false）：dist 可用即展示。onMounted 与历史加载后的补偿刷新都可能
+//   启动轮询，若首次轮询先成功设置了预览，重启的轮询发现标记未变（重开项目不会触发新构建）
+//   必须立即结束，否则会以 Building 状态空等 5 分钟；
+//   对话结束（waitForNew=true）：等待构建标记变化（ETag / Last-Modified，缺失时降级 index.html
+//   内容指纹）才刷新预览；变化后连续 2 次稳定视为构建完成。超时 5 分钟（100 次 × 3s）停止。
 const previewPolling = ref(false)
 let previewPollSeq = 0
 let previewPollTimer = null
@@ -332,7 +383,7 @@ function stopPreviewPolling() {
   previewPollTimer = null
 }
 
-async function pollVuePreview(appId, seq, attempts) {
+async function pollVuePreview(appId, seq, attempts, waitForNew) {
   const base = buildPreviewPath(CodeGenType.VUE_PROJECT, appId)
   try {
     const res = await fetch(base, { cache: 'no-store' })
@@ -356,8 +407,12 @@ async function pollVuePreview(appId, seq, attempts) {
         previewPolling.value = false
         previewChanged = true
         previewStableCount = 0
+      } else if (!waitForNew) {
+        // 初始加载：预览已就绪且无新构建（onMounted 重启轮询的竞态），无需等待
+        previewPolling.value = false
+        return
       }
-      // 标记变化过才计稳定数；二次对话时旧标记不变则一直等待新构建
+      // 标记变化过才计稳定数；等待新构建时旧标记不变则一直等待
       if (previewChanged) previewStableCount++
     }
   } catch {
@@ -369,22 +424,24 @@ async function pollVuePreview(appId, seq, attempts) {
     previewPolling.value = false
     return
   }
-  previewPollTimer = setTimeout(() => pollVuePreview(appId, seq, attempts + 1), 3000)
+  previewPollTimer = setTimeout(() => pollVuePreview(appId, seq, attempts + 1, waitForNew), 3000)
 }
 
-function startVuePreviewPoll(appId) {
+function startVuePreviewPoll(appId, waitForNew) {
   stopPreviewPolling()
   previewStableCount = 0
   previewChanged = false
   const seq = ++previewPollSeq
-  // 等待新构建期间显示 Building 状态（二次对话时覆盖旧预览，让用户感知构建中）
-  previewPolling.value = true
-  pollVuePreview(appId, seq, 0)
+  // 对话后的新构建用 Building 状态覆盖旧预览（让用户感知构建中）；初始加载仅在还没有预览时显示
+  if (waitForNew || !previewUrl.value) {
+    previewPolling.value = true
+  }
+  pollVuePreview(appId, seq, 0, waitForNew)
 }
 
-function updatePreview(codeGenType, appId) {
+function updatePreview(codeGenType, appId, waitForNew = false) {
   if (codeGenType === CodeGenType.VUE_PROJECT) {
-    startVuePreviewPoll(appId)
+    startVuePreviewPoll(appId, waitForNew)
   } else {
     stopPreviewPolling()
     previewPolling.value = false
@@ -581,8 +638,15 @@ onMounted(async () => {
 })
 
 async function sendMessage(text) {
-  const msg = typeof text === 'string' ? text : chatInput.value.trim()
-  if (!msg || streaming.value) return
+  const raw = typeof text === 'string' ? text : chatInput.value.trim()
+  if (!raw || streaming.value) return
+
+  // Visual edit: 将选中的元素信息拼入提示词，随后清空选中并退出编辑模式
+  let msg = raw
+  if (selectedElements.value.length) {
+    msg = `${raw}\n\n${buildSelectionContext(selectedElements.value)}`
+    resetVisualEdit()
+  }
 
   // Close any stale SSE connection before starting a new one
   if (eventSource) {
@@ -631,7 +695,8 @@ async function sendMessage(text) {
         const updated = await api.getAppVOById(appId.value)
         app.value = updated
         if (updated.codeGenType) {
-          updatePreview(updated.codeGenType, updated.id)
+          // 对话流结束才触发后端异步构建，需等待新的构建标记
+          updatePreview(updated.codeGenType, updated.id, true)
         }
       } catch (e) {
         toast.showError(e.message || 'Failed to refresh app data')

@@ -51,7 +51,8 @@ export const api = {
     return getAppVoById({ id })
   },
   listMyAppVOPage(params) {
-    return listMyAppVoByPage(params)
+    // 默认按创建时间倒序（最新创建的在前），走 idx_createTime 索引；调用方可覆盖
+    return listMyAppVoByPage({ pageNum: 1, pageSize: 10, sortField: 'createTime', sortOrder: 'descend', ...params })
   },
   listGoodAppVOPage(params) {
     return listGoodAppVoByPage(params)
