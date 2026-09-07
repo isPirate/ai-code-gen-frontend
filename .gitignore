@@ -20,6 +20,9 @@ out/
 *.swp
 *.swo
 
+# AI agent session artifacts
+.zcode/
+
 # OS
 .DS_Store
 Thumbs.db
