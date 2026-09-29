@@ -703,7 +703,9 @@ async function sendMessage(text) {
       }
     },
     (err) => {
-      aiMsg.text = 'Error: ' + (err.message || 'Unknown error')
+      const note = err.message || 'Unknown error'
+      // 流中失败：保留已输出内容后追加提示；流前拒绝（无内容）：替换式展示
+      aiMsg.text = aiMsg.text ? `${aiMsg.text}\n\n[系统提示] ${note}` : `Error: ${note}`
       streaming.value = false
       triggerRef(messages)
     },

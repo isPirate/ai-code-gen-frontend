@@ -131,6 +131,9 @@ export const api = {
 
     const es = new EventSource(url, { withCredentials: true })
     let closed = false
+    // 流前业务错误（限流/无权限/参数错）由后端 GlobalExceptionHandler 以 business-error 事件下发，
+    // 命名事件不触发 onmessage，需独立监听；rejected 后 done 不再走正常完成流程
+    let rejected = false
 
     es.onmessage = (event) => {
       try {
@@ -158,11 +161,25 @@ export const api = {
     es.addEventListener('done', () => {
       closed = true
       es.close()
-      onDone()
+      // 被拒请求：onError 已接管（展示错误并结束流式状态），跳过 app 刷新等正常完成逻辑
+      if (!rejected) onDone()
+    })
+
+    es.addEventListener('business-error', (event) => {
+      if (closed || rejected) return
+      rejected = true
+      let reason = '请求失败'
+      try {
+        const parsed = JSON.parse(event.data)
+        if (parsed && parsed.message) reason = parsed.message
+      } catch {
+        // keep default reason
+      }
+      if (onError) onError(new Error(reason))
     })
 
     es.onerror = () => {
-      if (closed) return
+      if (closed || rejected) return
       closed = true
       es.close()
       if (onError) {
