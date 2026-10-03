@@ -467,6 +467,37 @@ function scrollToBottom() {
   })
 }
 
+// 流式渲染节流：SSE delta 只累积到内存，UI 每 150ms 批量上屏，done/error 立即 flush。
+// 逐 token triggerRef 会让整页重渲染 + 巨型文本节点反复布局，成本随内容线性增长（累计
+// O(n²)），十几万行 SSE 时主线程饱和冻结——后端与连接本身是正常的
+const STREAM_FLUSH_MS = 150
+let streamFlushTimer = null
+
+function scheduleStreamFlush() {
+  if (streamFlushTimer === null) {
+    streamFlushTimer = setTimeout(flushStreamNow, STREAM_FLUSH_MS)
+  }
+}
+
+function flushStreamNow() {
+  if (streamFlushTimer !== null) {
+    clearTimeout(streamFlushTimer)
+    streamFlushTimer = null
+  }
+  triggerRef(messages)
+  // 滚动跟随与渲染同帧完成，读写各一次，避免每个 chunk 两次强制同步布局
+  if (nearBottom.value) {
+    nextTick(() => {
+      if (chatContainer.value) {
+        chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+      }
+      if (thinkingPanelEl.value) {
+        thinkingPanelEl.value.scrollTop = thinkingPanelEl.value.scrollHeight
+      }
+    })
+  }
+}
+
 function mapHistoryMessage(record) {
   return {
     id: record.id,
@@ -550,6 +581,7 @@ function onResizeEnd() {
 
 onUnmounted(() => {
   clearTimeout(copyTimer)
+  if (streamFlushTimer !== null) clearTimeout(streamFlushTimer)
   stopPreviewPolling()
   if (eventSource) { eventSource.close(); eventSource = null }
   document.body.style.userSelect = ''
@@ -683,14 +715,13 @@ async function sendMessage(text) {
     msg,
     (chunk) => {
       aiMsg.text += chunk
-      triggerRef(messages)
-      if (nearBottom.value) scrollToBottom()
+      scheduleStreamFlush()
     },
     async () => {
       streaming.value = false
       // 思考完成默认收起；错误文本（Error / 系统提示）时保持展开便于排查
       aiMsg.thinkingOpen = !(aiMsg.text.startsWith('Error') || aiMsg.text.startsWith('[系统提示]'))
-      triggerRef(messages)
+      flushStreamNow()
       try {
         const updated = await api.getAppVOById(appId.value)
         app.value = updated
@@ -707,19 +738,11 @@ async function sendMessage(text) {
       // 流中失败：保留已输出内容后追加提示；流前拒绝（无内容）：替换式展示
       aiMsg.text = aiMsg.text ? `${aiMsg.text}\n\n[系统提示] ${note}` : `Error: ${note}`
       streaming.value = false
-      triggerRef(messages)
+      flushStreamNow()
     },
     (chunk) => {
       aiMsg.thinking += chunk
-      triggerRef(messages)
-      if (nearBottom.value) {
-        scrollToBottom()
-        nextTick(() => {
-          if (thinkingPanelEl.value) {
-            thinkingPanelEl.value.scrollTop = thinkingPanelEl.value.scrollHeight
-          }
-        })
-      }
+      scheduleStreamFlush()
     }
   )
 }

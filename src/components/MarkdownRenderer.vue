@@ -1,5 +1,7 @@
 <template>
-  <div ref="container" class="markdown-body" v-html="rendered" @click="onClick"></div>
+  <div ref="container" class="markdown-body" @click="onClick">
+    <div v-for="(html, i) in blocks" :key="i" v-html="html"></div>
+  </div>
 </template>
 
 <script setup>
@@ -51,14 +53,58 @@ marked.use({
   }
 })
 
-const rendered = ref('')
+const blocks = ref([])
 let renderRAF = null
+
+// 流式增量渲染：按围栏代码块把内容切段，已完成的段缓存 html 复用，只有最后一个活跃段
+// 随内容重渲染。此前每个 chunk 对全量内容做 marked+hljs+DOMPurify+innerHTML 整体替换，
+// 代码库级长输出下每帧解析达秒级，主线程被拖死
+const htmlCache = new Map()
+
+// 段只会追加或末段增长（流式是追加写），索引天然稳定，v-for 用 index 作 key 不会重建已完成段的 DOM
+function splitSegments(md) {
+  const out = []
+  const lines = md.split('\n')
+  let cur = []
+  let inFence = false
+  for (const line of lines) {
+    if (!inFence && /^\s{0,3}(```|~~~)/.test(line)) {
+      if (cur.length) out.push(cur.join('\n'))
+      cur = [line]
+      inFence = true
+    } else if (inFence && /^\s{0,3}(`{3,}|~{3,})\s*$/.test(line)) {
+      cur.push(line)
+      out.push(cur.join('\n'))
+      cur = []
+      inFence = false
+    } else {
+      cur.push(line)
+    }
+  }
+  if (cur.length) out.push(cur.join('\n'))
+  return out
+}
+
+function render() {
+  const src = props.content
+  if (!src) {
+    blocks.value = []
+    return
+  }
+  const segs = splitSegments(src)
+  blocks.value = segs.map((seg, i) => {
+    let html = htmlCache.get(seg)
+    if (html !== undefined) return html
+    html = DOMPurify.sanitize(marked.parse(seg))
+    // 活跃段（最后一段）不缓存：内容仍在增长，缓存中间态会随流式次数线性堆积内存
+    if (i < segs.length - 1) htmlCache.set(seg, html)
+    return html
+  })
+}
 
 watch(() => props.content, () => {
   if (renderRAF) cancelAnimationFrame(renderRAF)
-  renderRAF = requestAnimationFrame(() => {
-    rendered.value = props.content ? DOMPurify.sanitize(marked.parse(props.content)) : ''
-  })
+  renderRAF = requestAnimationFrame(render)
 }, { immediate: true })
 
 const copyTimers = new Set()
